@@ -1,0 +1,286 @@
+// Prisma Schema for Automotive Workshop Management System
+// Database: PostgreSQL (chosen for ACID compliance, complex queries, and reliability)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(EMPLOYEE)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+// ============================================
+// CUSTOMER MANAGEMENT
+// ============================================
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  documentType DocumentType
+  document     String         @unique // CPF or CNPJ
+  email        String
+  phone        String
+  address      String?
+  city         String?
+  state        String?
+  zipCode      String?
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  vehicles     Vehicle[]
+  serviceOrders ServiceOrder[]
+
+  @@map("customers")
+}
+
+enum DocumentType {
+  CPF
+  CNPJ
+}
+
+// ============================================
+// VEHICLE MANAGEMENT
+// ============================================
+
+model Vehicle {
+  id            String         @id @default(uuid())
+  licensePlate  String         @unique
+  brand         String
+  model         String
+  year          Int
+  color         String?
+  chassisNumber String?
+  customerId    String
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  serviceOrders ServiceOrder[]
+
+  @@index([customerId])
+  @@map("vehicles")
+}
+
+// ============================================
+// SERVICE CATALOG
+// ============================================
+
+model Service {
+  id                 String              @id @default(uuid())
+  name               String
+  description        String?
+  estimatedDuration  Int // in minutes
+  price              Decimal             @db.Decimal(10, 2)
+  category           ServiceCategory
+  active             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  serviceOrderItems  ServiceOrderItem[]
+
+  @@map("services")
+}
+
+enum ServiceCategory {
+  MAINTENANCE
+  REPAIR
+  INSPECTION
+  DIAGNOSTICS
+  ALIGNMENT
+  TIRE_SERVICE
+  ELECTRICAL
+  BODYWORK
+  OTHER
+}
+
+// ============================================
+// PARTS & INVENTORY MANAGEMENT
+// ============================================
+
+model Part {
+  id               String            @id @default(uuid())
+  name             String
+  description      String?
+  partNumber       String            @unique
+  manufacturer     String?
+  price            Decimal           @db.Decimal(10, 2)
+  stockQuantity    Int               @default(0)
+  minStockLevel    Int               @default(5)
+  unit             String            @default("un") // unit of measurement
+  active           Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  partOrderItems   PartOrderItem[]
+  stockMovements   StockMovement[]
+
+  @@map("parts")
+}
+
+model StockMovement {
+  id          String           @id @default(uuid())
+  partId      String
+  part        Part             @relation(fields: [partId], references: [id])
+  movementType MovementType
+  quantity    Int
+  reason      String?
+  performedBy String?
+  createdAt   DateTime         @default(now())
+
+  @@index([partId])
+  @@map("stock_movements")
+}
+
+enum MovementType {
+  IN          // Stock entry
+  OUT         // Stock exit
+  ADJUSTMENT  // Manual adjustment
+}
+
+// ============================================
+// SERVICE ORDER (OS) - CORE ENTITY
+// ============================================
+
+model ServiceOrder {
+  id                  String             @id @default(uuid())
+  orderNumber         String             @unique // Sequential number for display
+  customerId          String
+  customer            Customer           @relation(fields: [customerId], references: [id])
+  vehicleId           String
+  vehicle             Vehicle            @relation(fields: [vehicleId], references: [id])
+  status              ServiceOrderStatus @default(RECEIVED)
+  priority            Priority           @default(NORMAL)
+  description         String // Initial complaint/request
+  diagnosis           String? // Technical diagnosis
+  observations        String?
+  estimatedCompletion DateTime?
+  actualCompletion    DateTime?
+  totalAmount         Decimal            @db.Decimal(10, 2) @default(0)
+  approvedAmount      Decimal?           @db.Decimal(10, 2)
+  approvedAt          DateTime?
+  approvedBy          String? // Customer approval
+  createdBy           String?
+  assignedTo          String? // Mechanic assigned
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  serviceItems        ServiceOrderItem[]
+  partItems           PartOrderItem[]
+  statusHistory       ServiceOrderStatusHistory[]
+
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("service_orders")
+}
+
+enum ServiceOrderStatus {
+  RECEIVED              // Order received
+  IN_DIAGNOSIS          // Being diagnosed
+  AWAITING_APPROVAL     // Waiting for customer approval
+  APPROVED              // Approved by customer
+  IN_PROGRESS           // Service being executed
+  AWAITING_PARTS        // Waiting for parts
+  COMPLETED             // Service completed
+  DELIVERED             // Vehicle delivered to customer
+  CANCELLED             // Order cancelled
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// ============================================
+// SERVICE ORDER ITEMS
+// ============================================
+
+model ServiceOrderItem {
+  id             String       @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  serviceId      String
+  service        Service      @relation(fields: [serviceId], references: [id])
+  quantity       Int          @default(1)
+  unitPrice      Decimal      @db.Decimal(10, 2)
+  totalPrice     Decimal      @db.Decimal(10, 2)
+  status         ItemStatus   @default(PENDING)
+  startedAt      DateTime?
+  completedAt    DateTime?
+  technicianNotes String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([serviceOrderId])
+  @@index([serviceId])
+  @@map("service_order_items")
+}
+
+model PartOrderItem {
+  id             String       @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  partId         String
+  part           Part         @relation(fields: [partId], references: [id])
+  quantity       Int
+  unitPrice      Decimal      @db.Decimal(10, 2)
+  totalPrice     Decimal      @db.Decimal(10, 2)
+  status         ItemStatus   @default(PENDING)
+  appliedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([serviceOrderId])
+  @@index([partId])
+  @@map("part_order_items")
+}
+
+enum ItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================
+// SERVICE ORDER STATUS HISTORY
+// ============================================
+
+model ServiceOrderStatusHistory {
+  id             String             @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder       @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  previousStatus ServiceOrderStatus?
+  newStatus      ServiceOrderStatus
+  changedBy      String?
+  reason         String?
+  createdAt      DateTime           @default(now())
+
+  @@index([serviceOrderId])
+  @@map("service_order_status_history")
+}
+

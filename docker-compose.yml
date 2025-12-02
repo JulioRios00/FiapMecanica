@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: workshop-db
+    restart: always
+    environment:
+      POSTGRES_USER: workshop
+      POSTGRES_PASSWORD: workshop123
+      POSTGRES_DB: workshop_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - workshop-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U workshop']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workshop-api
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://workshop:workshop123@postgres:5432/workshop_db?schema=public
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      JWT_EXPIRATION: 24h
+      API_PREFIX: api/v1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - workshop-network
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+
+volumes:
+  postgres_data:
+
+networks:
+  workshop-network:
+    driver: bridge
+
