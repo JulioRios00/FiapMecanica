@@ -138,7 +138,36 @@ PostgreSQL was chosen for:
 - Docker and Docker Compose installed
 - Git
 
-### Installation
+### Quick Setup (Recommended)
+
+We provide an automated setup script that handles all installation and configuration steps:
+
+```bash
+# Make the script executable (if not already)
+chmod +x run.sh
+
+# Run the automated setup
+./run.sh
+```
+
+The script will:
+- ✅ Check all prerequisites
+- ✅ Create environment variables file
+- ✅ Install npm dependencies
+- ✅ Start PostgreSQL database
+- ✅ Run database migrations
+- ✅ Optionally seed the database
+- ✅ Build the application
+- ✅ Optionally start the application
+
+**Interactive Options:**
+- Choose to overwrite existing `.env` file
+- Choose to seed database with sample data
+- Choose to start in development or production mode
+
+### Manual Installation
+
+If you prefer to set up manually, follow these steps:
 
 1. **Clone the repository**
 
@@ -188,7 +217,15 @@ npm run prisma:generate
 npm run prisma:migrate
 ```
 
-6. **Start the application**
+6. **Seed the database (optional)**
+
+```bash
+npm run prisma:seed
+```
+
+This will populate the database with sample data including users, customers, vehicles, services, parts, and service orders.
+
+7. **Start the application**
 
 ```bash
 # Development mode
@@ -199,7 +236,7 @@ npm run build
 npm run start:prod
 ```
 
-### Using Docker Compose (Recommended)
+### Using Docker Compose
 
 Start the entire application stack (database + API):
 
