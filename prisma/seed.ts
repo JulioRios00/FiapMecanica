@@ -6,6 +6,19 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed...');
 
+  // Clean up existing data (in correct order due to foreign key constraints)
+  console.log('🧹 Cleaning up existing data...');
+  await prisma.serviceOrderStatusHistory.deleteMany({});
+  await prisma.partOrderItem.deleteMany({});
+  await prisma.serviceOrderItem.deleteMany({});
+  await prisma.serviceOrder.deleteMany({});
+  await prisma.stockMovement.deleteMany({});
+  await prisma.part.deleteMany({});
+  await prisma.service.deleteMany({});
+  await prisma.vehicle.deleteMany({});
+  await prisma.customer.deleteMany({});
+  console.log('✅ Cleanup completed');
+
   // Create users
   console.log('👤 Creating users...');
   const adminUser = await prisma.user.upsert({

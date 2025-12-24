@@ -18,18 +18,18 @@ export interface ServiceOrderWithDetails extends ServiceOrder {
   partItems?: PartOrderItem[];
 }
 
-export interface ServiceOrderRepositoryPort {
-  create(
+export abstract class ServiceOrderRepositoryPort {
+  abstract create(
     serviceOrder: ServiceOrder,
     serviceItems?: ServiceOrderItem[],
     partItems?: PartOrderItem[],
   ): Promise<ServiceOrderWithDetails>;
-  findById(id: string): Promise<ServiceOrderWithDetails | null>;
-  findByOrderNumber(orderNumber: string): Promise<ServiceOrderWithDetails | null>;
-  findByCustomerId(customerId: string): Promise<ServiceOrder[]>;
-  findByVehicleId(vehicleId: string): Promise<ServiceOrder[]>;
-  findByStatus(status: ServiceOrderStatus): Promise<ServiceOrder[]>;
-  findAll(params?: {
+  abstract findById(id: string): Promise<ServiceOrderWithDetails | null>;
+  abstract findByOrderNumber(orderNumber: string): Promise<ServiceOrderWithDetails | null>;
+  abstract findByCustomerId(customerId: string): Promise<ServiceOrder[]>;
+  abstract findByVehicleId(vehicleId: string): Promise<ServiceOrder[]>;
+  abstract findByStatus(status: ServiceOrderStatus): Promise<ServiceOrder[]>;
+  abstract findAll(params?: {
     status?: ServiceOrderStatus;
     customerId?: string;
     page?: number;
@@ -40,11 +40,11 @@ export interface ServiceOrderRepositoryPort {
     page: number;
     limit: number;
   }>;
-  update(id: string, serviceOrder: ServiceOrder): Promise<ServiceOrder>;
-  updateStatus(id: string, status: ServiceOrderStatus, reason?: string): Promise<ServiceOrder>;
-  addServiceItem(serviceOrderId: string, item: ServiceOrderItem): Promise<void>;
-  addPartItem(serviceOrderId: string, item: PartOrderItem): Promise<void>;
-  getAverageExecutionTime(): Promise<number>;
-  delete(id: string): Promise<void>;
+  abstract update(id: string, serviceOrder: ServiceOrder): Promise<ServiceOrder>;
+  abstract updateStatus(id: string, status: ServiceOrderStatus, reason?: string): Promise<ServiceOrder>;
+  abstract addServiceItem(serviceOrderId: string, item: ServiceOrderItem): Promise<void>;
+  abstract addPartItem(serviceOrderId: string, item: PartOrderItem): Promise<void>;
+  abstract getAverageExecutionTime(): Promise<number>;
+  abstract delete(id: string): Promise<void>;
 }
 
