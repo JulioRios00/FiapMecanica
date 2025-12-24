@@ -1,0 +1,497 @@
+{
+  "info": {
+    "name": "FiapMecanica - Automotive Workshop API",
+    "description": "Complete API collection for the Automotive Workshop Management System. This collection includes all endpoints for customer management, vehicle management, service orders, authentication, and more.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "fiap-mecanica"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@workshop.com\",\n  \"password\": \"Test123!\",\n  \"name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user in the system. Returns user information upon successful registration."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save the access token to environment variable",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"accessToken\", jsonData.access_token);",
+                  "    console.log(\"Access token saved:\", jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@workshop.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate with email and password. Returns a JWT access token that should be used in subsequent requests."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration and login"
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Create Customer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"documentType\": \"CPF\",\n  \"document\": \"12345678909\",\n  \"email\": \"joao.silva@email.com\",\n  \"phone\": \"11987654321\",\n  \"address\": \"Rua das Flores, 123\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            },
+            "description": "Create a new customer with CPF or CNPJ validation"
+          },
+          "response": []
+        },
+        {
+          "name": "List Customers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?active=true&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true",
+                  "description": "Filter by active status"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "List all customers with optional filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer-uuid-here",
+                  "description": "Customer UUID"
+                }
+              ]
+            },
+            "description": "Get a specific customer by their ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva Updated\",\n  \"email\": \"joao.silva.updated@email.com\",\n  \"phone\": \"11999887766\",\n  \"address\": \"Rua das Flores, 456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer-uuid-here",
+                  "description": "Customer UUID"
+                }
+              ]
+            },
+            "description": "Update an existing customer's information"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer-uuid-here",
+                  "description": "Customer UUID"
+                }
+              ]
+            },
+            "description": "Soft delete a customer (sets active to false)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Customer management endpoints - CRUD operations for customers"
+    },
+    {
+      "name": "Service Orders",
+      "item": [
+        {
+          "name": "Create Service Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"customer-uuid-here\",\n  \"vehicleId\": \"vehicle-uuid-here\",\n  \"description\": \"Engine making strange noise and losing power\",\n  \"priority\": \"HIGH\",\n  \"services\": [\n    {\n      \"serviceId\": \"service-uuid-here\",\n      \"quantity\": 1\n    }\n  ],\n  \"parts\": [\n    {\n      \"partId\": \"part-uuid-here\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders"]
+            },
+            "description": "Create a new service order with associated services and parts. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "List Service Orders (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders?status=RECEIVED&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "RECEIVED",
+                  "description": "Filter by status (RECEIVED, IN_DIAGNOSIS, APPROVED, etc.)",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "customerId",
+                  "value": "customer-uuid-here",
+                  "description": "Filter by customer ID",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all service orders. This is a public endpoint for customer tracking."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Order by ID (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "service-order-uuid-here",
+                  "description": "Service Order UUID"
+                }
+              ]
+            },
+            "description": "Get a specific service order by ID. Public endpoint for customers to track their orders."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Order by Order Number (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/number/:orderNumber",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders", "number", ":orderNumber"],
+              "variable": [
+                {
+                  "key": "orderNumber",
+                  "value": "OS000001",
+                  "description": "Service Order Number (e.g., OS000001)"
+                }
+              ]
+            },
+            "description": "Get a service order by its order number. Public endpoint for customer tracking."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service Order Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\",\n  \"reason\": \"Started diagnostic procedures\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "service-order-uuid-here",
+                  "description": "Service Order UUID"
+                }
+              ]
+            },
+            "description": "Update the status of a service order. Status options: RECEIVED, IN_DIAGNOSIS, AWAITING_APPROVAL, APPROVED, IN_PROGRESS, AWAITING_PARTS, COMPLETED, DELIVERED, CANCELLED"
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Service Order (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true,\n  \"approvedAmount\": 450.00,\n  \"customerName\": \"João Silva\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-orders/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-orders", ":id", "approve"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "service-order-uuid-here",
+                  "description": "Service Order UUID"
+                }
+              ]
+            },
+            "description": "Customer approval endpoint for service orders. Public endpoint that allows customers to approve the service order budget."
+          },
+          "response": []
+        }
+      ],
+      "description": "Service order management - create, list, update, and approve service orders"
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the API is running and healthy"
+          },
+          "response": []
+        }
+      ],
+      "description": "System health check endpoint"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

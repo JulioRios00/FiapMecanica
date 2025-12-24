@@ -7,32 +7,32 @@ This project implements Hexagonal Architecture, also known as Ports and Adapters
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Presentation Layer                       │
-│                   (Controllers, DTOs)                        │
+┌───────────────────────────────────────────────────────────┐
+│                     Presentation Layer                    │
+│                   (Controllers, DTOs)                     │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │   Customer   │  │Service Order │  │     Auth     │     │
 │  │  Controller  │  │  Controller  │  │  Controller  │     │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
-└─────────┼──────────────────┼──────────────────┼─────────────┘
+└─────────┼──────────────────┼──────────────────┼───────────┘
           │                  │                  │
           │   HTTP/REST      │                  │
           ▼                  ▼                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                         │
-│                 (Use Cases, Ports/Interfaces)                │
+┌───────────────────────────────────────────────────────────┐
+│                    Application Layer                      │
+│                 (Use Cases, Ports/Interfaces)             │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │   Create     │  │   Update     │  │   List       │     │
 │  │  Customer    │  │   Status     │  │  Orders      │     │
 │  │  Use Case    │  │  Use Case    │  │  Use Case    │     │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
-└─────────┼──────────────────┼──────────────────┼─────────────┘
+└─────────┼──────────────────┼──────────────────┼───────────┘
           │                  │                  │
           │   Ports          │                  │
           ▼                  ▼                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       Domain Layer                           │
-│                  (Business Logic, Entities)                  │
+┌───────────────────────────────────────────────────────────┐
+│                       Domain Layer                        │
+│                  (Business Logic, Entities)               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │   Customer   │  │Service Order │  │   Vehicle    │     │
 │  │   Entity     │  │   Entity     │  │   Entity     │     │
@@ -41,17 +41,17 @@ This project implements Hexagonal Architecture, also known as Ports and Adapters
 │  │  Document    │  │    Email     │  │License Plate │     │
 │  │Value Object  │  │Value Object  │  │Value Object  │     │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────┘
           ▲                  ▲                  ▲
           │   Adapters       │                  │
           │                  │                  │
 ┌─────────┼──────────────────┼──────────────────┼─────────────┐
 │         │         Infrastructure Layer        │             │
 │         │       (Adapters, External Services) │             │
-│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐     │
-│  │   Customer   │  │Service Order │  │     Auth     │     │
-│  │  Repository  │  │  Repository  │  │   Service    │     │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
+│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐       │
+│  │   Customer   │  │Service Order │  │     Auth     │       │
+│  │  Repository  │  │  Repository  │  │   Service    │       │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘       │
 └─────────┼──────────────────┼──────────────────┼─────────────┘
           │                  │                  │
           ▼                  ▼                  ▼
