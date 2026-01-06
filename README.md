@@ -58,6 +58,22 @@ src/
 └── modules/             # NestJS modules
 ```
 
+### C4 Architecture Documentation
+
+Comprehensive architecture diagrams are available in PlantUML format (`.wsd` files) following the C4 model:
+
+📁 **[docs/](docs/)** - See [docs/README.md](docs/README.md) for viewing instructions
+
+1. **[Context Diagram](docs/c4-context.wsd)** - System context with actors and external systems
+2. **[Container Diagram](docs/c4-container.wsd)** - High-level technology choices (API, Database, Swagger)
+3. **[Component Diagram](docs/c4-component.wsd)** - Detailed hexagonal architecture components
+4. **[Deployment Diagram](docs/c4-deployment.wsd)** - Development and production environments
+
+**View diagrams**:
+- VS Code: Install PlantUML extension, press `Alt+D`
+- Online: https://www.plantuml.com/plantuml/
+- CLI: `plantuml docs/*.wsd`
+
 ## 🛠️ Technologies
 
 - **Node.js** 20+ - Runtime environment
@@ -253,13 +269,42 @@ This will:
 
 - **API Base URL**: http://localhost:3000/api/v1
 - **Swagger Documentation**: http://localhost:3000/api/docs
-- **Health Check**: http://localhost:3000/api/v1/health
 
 ## 📚 API Documentation
 
 ### Interactive Documentation
 
 Access Swagger UI at: http://localhost:3000/api/docs
+
+### Postman Collection
+
+A comprehensive Postman collection is available with:
+- ✅ All 30 API endpoints organized by domain
+- ✅ 101 automated test assertions
+- ✅ Pre-configured authentication flow
+- ✅ Sample request bodies with validation
+- ✅ Response structure validation
+
+**Import the collection**:
+1. Open Postman
+2. Import `FiapMecanica.postman_collection.json`
+3. Run individual requests or the entire collection
+
+**Run with Newman (CLI)**:
+```bash
+# Install Newman globally
+npm install -g newman
+
+# Run the collection
+newman run FiapMecanica.postman_collection.json \
+  --env-var "baseUrl=http://localhost:3000/api/v1"
+
+# Export results to JSON
+newman run FiapMecanica.postman_collection.json \
+  --env-var "baseUrl=http://localhost:3000/api/v1" \
+  --reporters cli,json \
+  --reporter-json-export newman-results.json
+```
 
 ### Authentication
 
@@ -353,23 +398,48 @@ Content-Type: application/json
 
 ## 🧪 Testing
 
-### Run Unit Tests
+### Unit & Integration Tests (Jest)
 
 ```bash
+# Run unit tests
 npm test
-```
 
-### Run Tests with Coverage
-
-```bash
+# Run with coverage
 npm run test:cov
-```
 
-### Run E2E Tests
-
-```bash
+# Run E2E tests
 npm run test:e2e
 ```
+
+### API Testing (Postman/Newman)
+
+Comprehensive API testing with automated assertions:
+
+```bash
+# Install Newman CLI
+npm install -g newman
+
+# Run all 30 endpoints with 101 assertions
+newman run FiapMecanica.postman_collection.json \
+  --env-var "baseUrl=http://localhost:3000/api/v1"
+```
+
+**Test Coverage**:
+- ✅ Authentication flow (Register, Login)
+- ✅ Customer CRUD operations
+- ✅ Vehicle management
+- ✅ Service catalog
+- ✅ Parts inventory
+- ✅ Service order lifecycle
+- ✅ Status transitions
+- ✅ Authorization checks
+
+**Assertions Include**:
+- Status code validation
+- Response structure validation
+- Data type validation
+- Business logic validation
+- Performance checks (<500ms)
 
 ### Coverage Requirements
 
@@ -382,32 +452,43 @@ The project aims for **80% minimum coverage** on critical domains:
 ## 📁 Project Structure
 
 ```
-oficinaMecanicaProject/
+FiapMecanica/
+├── docs/                                    # Architecture documentation
+│   ├── README.md                           # C4 diagrams guide
+│   ├── c4-context.wsd                      # System context
+│   ├── c4-container.wsd                    # Container diagram
+│   ├── c4-component.wsd                    # Component diagram
+│   └── c4-deployment.wsd                   # Deployment diagram
 ├── prisma/
-│   └── schema.prisma          # Database schema
+│   ├── schema.prisma                       # Database schema
+│   ├── seed.ts                             # Database seeding
+│   └── migrations/                         # Database migrations
 ├── src/
-│   ├── application/           # Application layer
-│   │   ├── ports/            # Repository interfaces
-│   │   └── use-cases/        # Business use cases
-│   ├── domain/               # Domain layer
-│   │   ├── entities/         # Business entities
-│   │   └── value-objects/    # Value objects
-│   ├── infrastructure/       # Infrastructure layer
-│   │   ├── auth/            # Authentication
-│   │   ├── database/        # Prisma client
-│   │   └── repositories/    # Repository implementations
-│   ├── presentation/         # Presentation layer
-│   │   ├── controllers/     # REST controllers
-│   │   └── dtos/            # Data transfer objects
-│   ├── modules/             # NestJS modules
-│   ├── app.module.ts        # Root module
-│   └── main.ts              # Application entry point
-├── test/                     # E2E tests
-├── docker-compose.yml        # Docker composition
-├── Dockerfile               # Container definition
-├── package.json             # Dependencies
-├── tsconfig.json            # TypeScript config
-└── README.md                # This file
+│   ├── application/                        # Application layer
+│   │   ├── ports/                         # Repository interfaces
+│   │   └── use-cases/                     # Business use cases
+│   ├── domain/                            # Domain layer
+│   │   ├── entities/                      # Business entities
+│   │   └── value-objects/                 # Value objects
+│   ├── infrastructure/                     # Infrastructure layer
+│   │   ├── auth/                          # Authentication
+│   │   ├── database/                      # Prisma client
+│   │   └── repositories/                  # Repository implementations
+│   ├── presentation/                       # Presentation layer
+│   │   ├── controllers/                   # REST controllers
+│   │   └── dtos/                          # Data transfer objects
+│   ├── modules/                           # NestJS modules
+│   ├── app.module.ts                      # Root module
+│   └── main.ts                            # Application entry point
+├── test/                                   # E2E tests
+├── FiapMecanica.postman_collection.json   # API test collection
+├── docker-compose.yml                      # Docker composition
+├── Dockerfile                              # Container definition
+├── run.sh                                  # Automated setup script
+├── package.json                            # Dependencies
+├── tsconfig.json                           # TypeScript config
+├── ARCHITECTURE.md                         # Architecture details
+└── README.md                               # This file
 ```
 
 ## 💾 Database
