@@ -25,6 +25,7 @@ import { GetServiceOrderUseCase } from '@application/use-cases/service-order/get
 import { ListServiceOrdersUseCase } from '@application/use-cases/service-order/list-service-orders.use-case';
 import { UpdateServiceOrderStatusUseCase } from '@application/use-cases/service-order/update-service-order-status.use-case';
 import { ApproveServiceOrderUseCase } from '@application/use-cases/service-order/approve-service-order.use-case';
+import { GetServiceExecutionMetricsUseCase } from '@application/use-cases/service-order/get-service-execution-metrics.use-case';
 
 @ApiTags('service-orders')
 @Controller('service-orders')
@@ -35,6 +36,7 @@ export class ServiceOrderController {
     private readonly listServiceOrdersUseCase: ListServiceOrdersUseCase,
     private readonly updateServiceOrderStatusUseCase: UpdateServiceOrderStatusUseCase,
     private readonly approveServiceOrderUseCase: ApproveServiceOrderUseCase,
+    private readonly getServiceExecutionMetricsUseCase: GetServiceExecutionMetricsUseCase,
   ) {}
 
   @Post()
@@ -115,6 +117,24 @@ export class ServiceOrderController {
       approveDto.approvedBy,
       approveDto.approvedAmount,
     );
+  }
+
+  @Get('metrics/execution')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get service execution metrics and average time' })
+  @ApiResponse({ status: 200, description: 'Metrics retrieved successfully' })
+  @ApiQuery({ name: 'startDate', required: false, type: Date, description: 'Filter from date' })
+  @ApiQuery({ name: 'endDate', required: false, type: Date, description: 'Filter to date' })
+  async getMetrics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const filters: any = {};
+    if (startDate) filters.startDate = new Date(startDate);
+    if (endDate) filters.endDate = new Date(endDate);
+    
+    return await this.getServiceExecutionMetricsUseCase.execute(filters);
   }
 }
 

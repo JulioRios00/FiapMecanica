@@ -5,6 +5,7 @@ import { GetServiceOrderUseCase } from '@application/use-cases/service-order/get
 import { ListServiceOrdersUseCase } from '@application/use-cases/service-order/list-service-orders.use-case';
 import { UpdateServiceOrderStatusUseCase } from '@application/use-cases/service-order/update-service-order-status.use-case';
 import { ApproveServiceOrderUseCase } from '@application/use-cases/service-order/approve-service-order.use-case';
+import { GetServiceExecutionMetricsUseCase } from '@application/use-cases/service-order/get-service-execution-metrics.use-case';
 import { ServiceOrderRepository } from '@infrastructure/repositories/service-order.repository';
 import { ServiceOrderRepositoryPort } from '@application/ports/service-order.repository.port';
 import { CustomerRepository } from '@infrastructure/repositories/customer.repository';
@@ -46,6 +47,7 @@ import { PrismaService } from '@infrastructure/database/prisma.service';
     ListServiceOrdersUseCase,
     UpdateServiceOrderStatusUseCase,
     ApproveServiceOrderUseCase,
+    GetServiceExecutionMetricsUseCase,
   ],
 })
 export class ServiceOrderModule {}

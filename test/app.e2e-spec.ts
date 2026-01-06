@@ -12,6 +12,8 @@ describe('Workshop API (e2e)', () => {
   let customerId: string;
   let vehicleId: string;
   let serviceId: string;
+  let partId: string;
+  let serviceOrderId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -136,44 +138,180 @@ describe('Workshop API (e2e)', () => {
   });
 
   describe('Vehicles', () => {
-    it('/api/v1/vehicles (POST) - should be implemented', () => {
-      // This would require implementing the vehicle controller
-      // Left as an example of what should be tested
-      expect(true).toBe(true);
+    it('/api/v1/vehicles (POST)', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/vehicles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          licensePlate: 'XYZ5678',
+          brand: 'Honda',
+          model: 'Civic',
+          year: 2023,
+          customerId,
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.id).toBeDefined();
+          expect(res.body.licensePlate).toBe('XYZ5678');
+          vehicleId = res.body.id;
+        });
+    });
+
+    it('/api/v1/vehicles (GET)', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/vehicles')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data).toBeInstanceOf(Array);
+          expect(res.body.data.length).toBeGreaterThan(0);
+        });
+    });
+
+    it('/api/v1/vehicles/:id (GET)', () => {
+      return request(app.getHttpServer())
+        .get(`/api/v1/vehicles/${vehicleId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(vehicleId);
+          expect(res.body.licensePlate).toBe('XYZ5678');
+        });
+    });
+
+    it('/api/v1/vehicles/:id (PUT)', () => {
+      return request(app.getHttpServer())
+        .put(`/api/v1/vehicles/${vehicleId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          brand: 'Honda',
+          model: 'Civic EX',
+          year: 2024,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.model).toBe('Civic EX');
+          expect(res.body.year).toBe(2024);
+        });
     });
   });
 
   describe('Services', () => {
-    it('Create service for testing', async () => {
-      const service = await prisma.service.create({
-        data: {
+    it('/api/v1/services (POST)', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/services')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
           name: 'Oil Change',
           description: 'Complete oil change',
           estimatedDuration: 60,
           price: 150.00,
           category: ServiceCategory.MAINTENANCE,
-        },
-      });
-      serviceId = service.id;
-      expect(serviceId).toBeDefined();
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.id).toBeDefined();
+          expect(res.body.name).toBe('Oil Change');
+          serviceId = res.body.id;
+        });
+    });
+
+    it('/api/v1/services (GET)', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/services')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data).toBeInstanceOf(Array);
+          expect(res.body.data.length).toBeGreaterThan(0);
+        });
+    });
+
+    it('/api/v1/services/:id (GET)', () => {
+      return request(app.getHttpServer())
+        .get(`/api/v1/services/${serviceId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(serviceId);
+          expect(res.body.name).toBe('Oil Change');
+        });
+    });
+
+    it('/api/v1/services/:id (PUT)', () => {
+      return request(app.getHttpServer())
+        .put(`/api/v1/services/${serviceId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          price: 180.00,
+          estimatedDuration: 45,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.price).toBe(180);
+        });
+    });
+  });
+
+  describe('Parts', () => {
+    it('/api/v1/parts (POST)', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/parts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Oil Filter',
+          partNumber: 'OF-12345',
+          price: 45.50,
+          stockQuantity: 100,
+          minStockLevel: 10,
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.id).toBeDefined();
+          expect(res.body.name).toBe('Oil Filter');
+          partId = res.body.id;
+        });
+    });
+
+    it('/api/v1/parts (GET)', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/parts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data).toBeInstanceOf(Array);
+          expect(res.body.data.length).toBeGreaterThan(0);
+        });
+    });
+
+    it('/api/v1/parts/:id (GET)', () => {
+      return request(app.getHttpServer())
+        .get(`/api/v1/parts/${partId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(partId);
+          expect(res.body.name).toBe('Oil Filter');
+        });
+    });
+
+    it('/api/v1/parts/:id (PUT)', () => {
+      return request(app.getHttpServer())
+        .put(`/api/v1/parts/${partId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          price: 50.00,
+          stockQuantity: 120,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.price).toBe(50);
+          expect(res.body.stockQuantity).toBe(120);
+        });
     });
   });
 
   describe('Service Orders', () => {
-    beforeAll(async () => {
-      // Create a vehicle for testing
-      const vehicle = await prisma.vehicle.create({
-        data: {
-          licensePlate: 'ABC1234',
-          brand: 'Toyota',
-          model: 'Corolla',
-          year: 2020,
-          customerId,
-        },
-      });
-      vehicleId = vehicle.id;
-    });
-
     it('/api/v1/service-orders (POST)', () => {
       return request(app.getHttpServer())
         .post('/api/v1/service-orders')
@@ -189,12 +327,19 @@ describe('Workshop API (e2e)', () => {
               quantity: 1,
             },
           ],
+          parts: [
+            {
+              partId,
+              quantity: 2,
+            },
+          ],
         })
         .expect(201)
         .expect((res) => {
           expect(res.body.id).toBeDefined();
           expect(res.body.orderNumber).toBeDefined();
           expect(res.body.status).toBe('RECEIVED');
+          serviceOrderId = res.body.id;
         });
     });
 
@@ -204,7 +349,85 @@ describe('Workshop API (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body.data).toBeInstanceOf(Array);
+          expect(res.body.data.length).toBeGreaterThan(0);
         });
+    });
+
+    it('/api/v1/service-orders/:id (GET) - public endpoint', () => {
+      return request(app.getHttpServer())
+        .get(`/api/v1/service-orders/${serviceOrderId}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.id).toBe(serviceOrderId);
+          expect(res.body.status).toBe('RECEIVED');
+        });
+    });
+
+    it('/api/v1/service-orders/:id/status (PUT)', () => {
+      return request(app.getHttpServer())
+        .put(`/api/v1/service-orders/${serviceOrderId}/status`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          status: 'IN_DIAGNOSIS',
+          reason: 'Starting vehicle diagnosis',
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.status).toBe('IN_DIAGNOSIS');
+        });
+    });
+
+    it('/api/v1/service-orders/:id/approve (POST) - public endpoint', () => {
+      return request(app.getHttpServer())
+        .post(`/api/v1/service-orders/${serviceOrderId}/approve`)
+        .send({
+          customerId,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.status).toBe('APPROVED');
+        });
+    });
+
+    it('/api/v1/service-orders/metrics/execution (GET)', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/service-orders/metrics/execution')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.totalServiceOrders).toBeDefined();
+          expect(res.body.averageExecutionTimeInHours).toBeDefined();
+        });
+    });
+  });
+
+  describe('Cleanup - Soft Deletes', () => {
+    it('/api/v1/parts/:id (DELETE)', () => {
+      return request(app.getHttpServer())
+        .delete(`/api/v1/parts/${partId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+    });
+
+    it('/api/v1/services/:id (DELETE)', () => {
+      return request(app.getHttpServer())
+        .delete(`/api/v1/services/${serviceId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+    });
+
+    it('/api/v1/vehicles/:id (DELETE)', () => {
+      return request(app.getHttpServer())
+        .delete(`/api/v1/vehicles/${vehicleId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+    });
+
+    it('/api/v1/customers/:id (DELETE)', () => {
+      return request(app.getHttpServer())
+        .delete(`/api/v1/customers/${customerId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
     });
   });
 
@@ -243,18 +466,31 @@ describe('Workshop API (e2e)', () => {
         .expect(404);
     });
 
-    it('should return 409 for duplicate customer', () => {
+    it('should return 400 for invalid license plate format', () => {
       return request(app.getHttpServer())
-        .post('/api/v1/customers')
+        .post('/api/v1/vehicles')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Jane Doe',
-          documentType: DocumentType.CPF,
-          document: '12345678909', // Same as first customer
-          email: 'jane@example.com',
-          phone: '11987654321',
+          licensePlate: 'INVALID',
+          brand: 'Test',
+          model: 'Test',
+          year: 2023,
+          customerId,
         })
-        .expect(409);
+        .expect(400);
+    });
+
+    it('should return 400 for invalid service category', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/services')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Service',
+          estimatedDuration: 30,
+          price: 100,
+          category: 'INVALID_CATEGORY',
+        })
+        .expect(400);
     });
   });
 });

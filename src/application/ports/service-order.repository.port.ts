@@ -45,6 +45,12 @@ export abstract class ServiceOrderRepositoryPort {
   abstract addServiceItem(serviceOrderId: string, item: ServiceOrderItem): Promise<void>;
   abstract addPartItem(serviceOrderId: string, item: PartOrderItem): Promise<void>;
   abstract getAverageExecutionTime(): Promise<number>;
+  abstract getExecutionMetrics(filters?: { startDate?: Date; endDate?: Date }): Promise<{
+    totalServiceOrders: number;
+    completedServiceOrders: number;
+    averageExecutionTimeInHours: number;
+    servicesByStatus: { status: string; count: number }[];
+  }>;
   abstract delete(id: string): Promise<void>;
 }
 

@@ -3,6 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '@infrastructure/auth/auth.module';
 import { CustomerModule } from './modules/customer.module';
 import { ServiceOrderModule } from './modules/service-order.module';
+import { VehicleModule } from './modules/vehicle.module';
+import { ServiceModule } from './modules/service.module';
+import { PartModule } from './modules/part.module';
 
 @Module({
   imports: [
@@ -11,6 +14,9 @@ import { ServiceOrderModule } from './modules/service-order.module';
     }),
     AuthModule,
     CustomerModule,
+    VehicleModule,
+    ServiceModule,
+    PartModule,
     ServiceOrderModule,
   ],
 })

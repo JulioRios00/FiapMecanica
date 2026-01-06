@@ -297,6 +297,82 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     return totalTime / completedOrders.length / (1000 * 60 * 60); // Return in hours
   }
 
+  async getExecutionMetrics(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<{
+    totalServiceOrders: number;
+    completedServiceOrders: number;
+    averageExecutionTimeInHours: number;
+    servicesByStatus: { status: string; count: number }[];
+  }> {
+    const where: any = {};
+    
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {};
+      if (filters.startDate) where.createdAt.gte = filters.startDate;
+      if (filters.endDate) where.createdAt.lte = filters.endDate;
+    }
+
+    // Total service orders
+    const totalServiceOrders = await this.prisma.serviceOrder.count({ where });
+
+    // Completed service orders
+    const completedServiceOrders = await this.prisma.serviceOrder.count({
+      where: {
+        ...where,
+        status: {
+          in: [ServiceOrderStatus.COMPLETED, ServiceOrderStatus.DELIVERED],
+        },
+      },
+    });
+
+    // Average execution time
+    const completedOrders = await this.prisma.serviceOrder.findMany({
+      where: {
+        ...where,
+        status: {
+          in: [ServiceOrderStatus.COMPLETED, ServiceOrderStatus.DELIVERED],
+        },
+        actualCompletion: { not: null },
+      },
+      select: {
+        createdAt: true,
+        actualCompletion: true,
+      },
+    });
+
+    let averageExecutionTimeInHours = 0;
+    if (completedOrders.length > 0) {
+      const totalTime = completedOrders.reduce((sum, order) => {
+        const diff = order.actualCompletion!.getTime() - order.createdAt.getTime();
+        return sum + diff;
+      }, 0);
+      averageExecutionTimeInHours = totalTime / completedOrders.length / (1000 * 60 * 60);
+    }
+
+    // Service orders by status
+    const statusGroups = await this.prisma.serviceOrder.groupBy({
+      by: ['status'],
+      where,
+      _count: {
+        status: true,
+      },
+    });
+
+    const servicesByStatus = statusGroups.map((group) => ({
+      status: group.status,
+      count: group._count.status,
+    }));
+
+    return {
+      totalServiceOrders,
+      completedServiceOrders,
+      averageExecutionTimeInHours,
+      servicesByStatus,
+    };
+  }
+
   async delete(id: string): Promise<void> {
     await this.prisma.serviceOrder.delete({
       where: { id },

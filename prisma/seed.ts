@@ -4,10 +4,6 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed...');
-
-  // Clean up existing data (in correct order due to foreign key constraints)
-  console.log('🧹 Cleaning up existing data...');
   await prisma.serviceOrderStatusHistory.deleteMany({});
   await prisma.partOrderItem.deleteMany({});
   await prisma.serviceOrderItem.deleteMany({});
@@ -17,10 +13,7 @@ async function main() {
   await prisma.service.deleteMany({});
   await prisma.vehicle.deleteMany({});
   await prisma.customer.deleteMany({});
-  console.log('✅ Cleanup completed');
 
-  // Create users
-  console.log('👤 Creating users...');
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@workshop.com' },
     update: {},
@@ -43,10 +36,7 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created users: ${adminUser.email}, ${employeeUser.email}`);
 
-  // Create customers
-  console.log('👥 Creating customers...');
   const customer1 = await prisma.customer.upsert({
     where: { document: '12345678909' },
     update: {},
@@ -79,10 +69,8 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created customers: ${customer1.name}, ${customer2.name}`);
 
-  // Create vehicles
-  console.log('🚗 Creating vehicles...');
+
   const vehicle1 = await prisma.vehicle.upsert({
     where: { licensePlate: 'ABC1234' },
     update: {},
@@ -109,10 +97,10 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created vehicles: ${vehicle1.licensePlate}, ${vehicle2.licensePlate}`);
+   (`✅ Created vehicles: ${vehicle1.licensePlate}, ${vehicle2.licensePlate}`);
 
   // Create services
-  console.log('🔧 Creating services...');
+   ('🔧 Creating services...');
   const services = await Promise.all([
     prisma.service.upsert({
       where: { id: 'service-oil-change' },
@@ -164,10 +152,10 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ Created ${services.length} services`);
+   (`✅ Created ${services.length} services`);
 
   // Create parts
-  console.log('🔩 Creating parts...');
+   ('🔩 Creating parts...');
   const parts = await Promise.all([
     prisma.part.upsert({
       where: { partNumber: 'OF-001' },
@@ -227,10 +215,10 @@ async function main() {
     }),
   ]);
 
-  console.log(`✅ Created ${parts.length} parts`);
+   (`✅ Created ${parts.length} parts`);
 
   // Create sample service orders
-  console.log('📋 Creating service orders...');
+   ('📋 Creating service orders...');
   const order1 = await prisma.serviceOrder.create({
     data: {
       orderNumber: 'OS000001',
@@ -310,9 +298,8 @@ async function main() {
     },
   });
 
-  console.log(`✅ Created service orders: ${order1.orderNumber}, ${order2.orderNumber}`);
+   (`✅ Created service orders: ${order1.orderNumber}, ${order2.orderNumber}`);
 
-  console.log('✅ Database seed completed successfully!');
 }
 
 main()
