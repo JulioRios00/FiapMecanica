@@ -1,5 +1,6 @@
 import { ServiceOrderStatus, Priority } from '@prisma/client';
 
+
 export interface ServiceOrderProps {
   id?: string;
   orderNumber?: string;
