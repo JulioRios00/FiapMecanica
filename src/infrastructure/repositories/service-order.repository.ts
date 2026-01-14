@@ -20,7 +20,6 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
   ): Promise<ServiceOrderWithDetails> {
     const data = serviceOrder.toJSON();
 
-    // Generate sequential order number
     const count = await this.prisma.serviceOrder.count();
     const orderNumber = `OS${String(count + 1).padStart(6, '0')}`;
 
@@ -99,9 +98,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     return this.mapToServiceOrder(serviceOrder);
   }
 
-  async findByOrderNumber(
-    orderNumber: string,
-  ): Promise<ServiceOrderWithDetails | null> {
+  async findByOrderNumber(orderNumber: string): Promise<ServiceOrderWithDetails | null> {
     const serviceOrder = await this.prisma.serviceOrder.findUnique({
       where: { orderNumber },
       include: {
@@ -243,10 +240,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     return this.mapToServiceOrder(updated);
   }
 
-  async addServiceItem(
-    serviceOrderId: string,
-    item: ServiceOrderItem,
-  ): Promise<void> {
+  async addServiceItem(serviceOrderId: string, item: ServiceOrderItem): Promise<void> {
     await this.prisma.serviceOrderItem.create({
       data: {
         serviceOrderId,
@@ -289,35 +283,29 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     if (completedOrders.length === 0) return 0;
 
     const totalTime = completedOrders.reduce((sum, order) => {
-      const diff =
-        order.actualCompletion!.getTime() - order.createdAt.getTime();
+      const diff = order.actualCompletion!.getTime() - order.createdAt.getTime();
       return sum + diff;
     }, 0);
 
     return totalTime / completedOrders.length / (1000 * 60 * 60); // Return in hours
   }
 
-  async getExecutionMetrics(filters?: {
-    startDate?: Date;
-    endDate?: Date;
-  }): Promise<{
+  async getExecutionMetrics(filters?: { startDate?: Date; endDate?: Date }): Promise<{
     totalServiceOrders: number;
     completedServiceOrders: number;
     averageExecutionTimeInHours: number;
     servicesByStatus: { status: string; count: number }[];
   }> {
     const where: any = {};
-    
+
     if (filters?.startDate || filters?.endDate) {
       where.createdAt = {};
       if (filters.startDate) where.createdAt.gte = filters.startDate;
       if (filters.endDate) where.createdAt.lte = filters.endDate;
     }
 
-    // Total service orders
     const totalServiceOrders = await this.prisma.serviceOrder.count({ where });
 
-    // Completed service orders
     const completedServiceOrders = await this.prisma.serviceOrder.count({
       where: {
         ...where,
@@ -327,7 +315,6 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
       },
     });
 
-    // Average execution time
     const completedOrders = await this.prisma.serviceOrder.findMany({
       where: {
         ...where,
@@ -351,7 +338,6 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
       averageExecutionTimeInHours = totalTime / completedOrders.length / (1000 * 60 * 60);
     }
 
-    // Service orders by status
     const statusGroups = await this.prisma.serviceOrder.groupBy({
       by: ['status'],
       where,
@@ -403,4 +389,3 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     });
   }
 }
-

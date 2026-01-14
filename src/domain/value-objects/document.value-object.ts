@@ -29,12 +29,10 @@ export class Document {
       throw new Error('CPF must have 11 digits');
     }
 
-    // Check if all digits are the same
     if (/^(\d)\1{10}$/.test(this.value)) {
       throw new Error('Invalid CPF');
     }
 
-    // Validate CPF checksum
     let sum = 0;
     let remainder: number;
 
@@ -65,12 +63,9 @@ export class Document {
       throw new Error('CNPJ must have 14 digits');
     }
 
-    // Check if all digits are the same
     if (/^(\d)\1{13}$/.test(this.value)) {
       throw new Error('Invalid CNPJ');
     }
-
-    // Validate CNPJ checksum
     let length = this.value.length - 2;
     let numbers = this.value.substring(0, length);
     const digits = this.value.substring(length);
@@ -119,4 +114,3 @@ export class Document {
     }
   }
 }
-

@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { ServiceOrderStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreateServiceOrderDto } from '../dtos/service-order/create-service-order.dto';
 import { UpdateServiceOrderStatusDto } from '../dtos/service-order/update-service-order-status.dto';
 import { ApproveServiceOrderDto } from '../dtos/service-order/approve-service-order.dto';
@@ -79,7 +80,7 @@ export class ServiceOrderController {
   })
   @ApiResponse({ status: 200, description: 'Service order retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Service order not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.getServiceOrderUseCase.execute(id);
   }
 
@@ -91,7 +92,7 @@ export class ServiceOrderController {
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Service order not found' })
   async updateStatus(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateStatusDto: UpdateServiceOrderStatusDto,
   ) {
     return await this.updateServiceOrderStatusUseCase.execute(
@@ -102,14 +103,17 @@ export class ServiceOrderController {
   }
 
   @Post(':id/approve')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Approve service order (public endpoint for customer approval)',
+    summary: 'Approve service order (protected endpoint - requires authentication)',
   })
   @ApiResponse({ status: 200, description: 'Service order approved successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Service order not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async approve(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() approveDto: ApproveServiceOrderDto,
   ) {
     return await this.approveServiceOrderUseCase.execute(

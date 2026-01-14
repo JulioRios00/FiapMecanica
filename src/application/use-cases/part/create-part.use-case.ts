@@ -7,10 +7,7 @@ export class CreatePartUseCase {
   constructor(private readonly partRepository: PartRepositoryPort) {}
 
   async execute(data: PartProps): Promise<Part> {
-    // Check if part with same part number already exists
-    const existingPart = await this.partRepository.findByPartNumber(
-      data.partNumber,
-    );
+    const existingPart = await this.partRepository.findByPartNumber(data.partNumber);
 
     if (existingPart) {
       throw new ConflictException('Part with this part number already exists');
@@ -20,4 +17,3 @@ export class CreatePartUseCase {
     return await this.partRepository.create(part);
   }
 }
-

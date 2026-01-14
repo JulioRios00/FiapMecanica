@@ -18,9 +18,7 @@ export class LicensePlate {
     const mercosulFormat = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
 
     if (!oldFormat.test(this.value) && !mercosulFormat.test(this.value)) {
-      throw new Error(
-        'Invalid license plate format. Must be ABC1234 or ABC1D23',
-      );
+      throw new Error('Invalid license plate format. Must be ABC1234 or ABC1D23');
     }
   }
 
@@ -36,4 +34,3 @@ export class LicensePlate {
     return this.value;
   }
 }
-

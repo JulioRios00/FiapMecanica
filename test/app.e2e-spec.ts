@@ -34,7 +34,6 @@ describe('Workshop API (e2e)', () => {
 
     prisma = app.get<PrismaService>(PrismaService);
 
-    // Clean database
     await prisma.serviceOrderItem.deleteMany();
     await prisma.partOrderItem.deleteMany();
     await prisma.serviceOrderStatusHistory.deleteMany();

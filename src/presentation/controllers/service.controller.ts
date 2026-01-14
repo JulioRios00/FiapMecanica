@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreateServiceDto } from '@presentation/dtos/service/create-service.dto';
 import { UpdateServiceDto } from '@presentation/dtos/service/update-service.dto';
 import { CreateServiceUseCase } from '@application/use-cases/service/create-service.use-case';
@@ -65,7 +66,7 @@ export class ServiceController {
   @ApiResponse({ status: 200, description: 'Service retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Service not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.getServiceUseCase.execute(id);
   }
 
@@ -76,7 +77,7 @@ export class ServiceController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateServiceDto: UpdateServiceDto,
   ) {
     return await this.updateServiceUseCase.execute(id, updateServiceDto);
@@ -88,7 +89,7 @@ export class ServiceController {
   @ApiResponse({ status: 204, description: 'Service deleted successfully' })
   @ApiResponse({ status: 404, description: 'Service not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteServiceUseCase.execute(id);
   }
 }
