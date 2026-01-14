@@ -19,6 +19,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreateCustomerDto } from '../dtos/customer/create-customer.dto';
 import { UpdateCustomerDto } from '../dtos/customer/update-customer.dto';
 import { CreateCustomerUseCase } from '@application/use-cases/customer/create-customer.use-case';
@@ -77,7 +78,7 @@ export class CustomerController {
   @ApiOperation({ summary: 'Get customer by ID' })
   @ApiResponse({ status: 200, description: 'Customer retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Customer not found' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const customer = await this.getCustomerUseCase.execute(id);
     return customer.toJSON();
   }
@@ -87,7 +88,7 @@ export class CustomerController {
   @ApiResponse({ status: 200, description: 'Customer updated successfully' })
   @ApiResponse({ status: 404, description: 'Customer not found' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
     const customer = await this.updateCustomerUseCase.execute(id, updateCustomerDto);
@@ -99,7 +100,7 @@ export class CustomerController {
   @ApiOperation({ summary: 'Delete customer (soft delete)' })
   @ApiResponse({ status: 204, description: 'Customer deleted successfully' })
   @ApiResponse({ status: 404, description: 'Customer not found' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteCustomerUseCase.execute(id);
   }
 }

@@ -81,7 +81,6 @@ export class Customer {
     this.updatedAt = new Date();
   }
 
-  // Getters
   public getId(): string | undefined {
     return this.id;
   }

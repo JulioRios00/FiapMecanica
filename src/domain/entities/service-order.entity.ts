@@ -91,7 +91,6 @@ export class ServiceOrder {
     this.status = newStatus;
     this.updatedAt = new Date();
 
-    // Automatically set completion date when status is COMPLETED or DELIVERED
     if (newStatus === ServiceOrderStatus.COMPLETED && !this.actualCompletion) {
       this.actualCompletion = new Date();
     }
@@ -209,7 +208,6 @@ export class ServiceOrder {
     return this.status === ServiceOrderStatus.CANCELLED;
   }
 
-  // Getters
   public getId(): string | undefined {
     return this.id;
   }

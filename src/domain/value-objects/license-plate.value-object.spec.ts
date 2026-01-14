@@ -57,9 +57,11 @@ describe('LicensePlate', () => {
       // Special characters are removed by sanitize
       // ABC@1234 becomes ABC1234 which is valid (3 letters + 4 numbers)
       expect(() => new LicensePlate('ABC@1234')).not.toThrow();
-      
+
       // ABC!D23 becomes ABCD23 which is invalid (should be ABC1D23 - 3 letters + 1 number + 1 letter + 2 numbers)
-      expect(() => new LicensePlate('ABC!D23')).toThrow('Invalid license plate format. Must be ABC1234 or ABC1D23');
+      expect(() => new LicensePlate('ABC!D23')).toThrow(
+        'Invalid license plate format. Must be ABC1234 or ABC1D23',
+      );
     });
   });
 

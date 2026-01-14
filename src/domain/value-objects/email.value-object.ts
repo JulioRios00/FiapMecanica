@@ -7,10 +7,9 @@ export class Email {
   }
 
   private validate(): void {
-    // More comprehensive email validation that allows +, -, _ in local part
-    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-    
-    // Additional checks for common invalid patterns
+    const emailRegex =
+      /^[a-zA-Z0-9][a-zA-Z0-9._+-]*[a-zA-Z0-9]@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+
     if (
       !emailRegex.test(this.value) ||
       this.value.includes('..') ||
@@ -26,4 +25,3 @@ export class Email {
     return this.value;
   }
 }
-

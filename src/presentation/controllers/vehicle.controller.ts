@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreateVehicleDto } from '@presentation/dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '@presentation/dtos/vehicle/update-vehicle.dto';
 import { CreateVehicleUseCase } from '@application/use-cases/vehicle/create-vehicle.use-case';
@@ -65,7 +66,7 @@ export class VehicleController {
   @ApiResponse({ status: 200, description: 'Vehicle retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.getVehicleUseCase.execute(id);
   }
 
@@ -76,7 +77,7 @@ export class VehicleController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
     return await this.updateVehicleUseCase.execute(id, updateVehicleDto);
@@ -88,7 +89,7 @@ export class VehicleController {
   @ApiResponse({ status: 204, description: 'Vehicle deleted successfully' })
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deleteVehicleUseCase.execute(id);
   }
 }

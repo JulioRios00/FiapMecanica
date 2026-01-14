@@ -11,16 +11,12 @@ export class CreateVehicleUseCase {
   ) {}
 
   async execute(data: VehicleProps): Promise<Vehicle> {
-    // Check if customer exists
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
 
-    // Check if vehicle with same license plate already exists
-    const existingVehicle = await this.vehicleRepository.findByLicensePlate(
-      data.licensePlate,
-    );
+    const existingVehicle = await this.vehicleRepository.findByLicensePlate(data.licensePlate);
 
     if (existingVehicle) {
       throw new ConflictException('Vehicle with this license plate already exists');
@@ -30,4 +26,3 @@ export class CreateVehicleUseCase {
     return await this.vehicleRepository.create(vehicle);
   }
 }
-

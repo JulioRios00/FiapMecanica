@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreatePartDto } from '@presentation/dtos/part/create-part.dto';
 import { UpdatePartDto } from '@presentation/dtos/part/update-part.dto';
 import { CreatePartUseCase } from '@application/use-cases/part/create-part.use-case';
@@ -65,7 +66,7 @@ export class PartController {
   @ApiResponse({ status: 200, description: 'Part retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Part not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return await this.getPartUseCase.execute(id);
   }
 
@@ -76,7 +77,7 @@ export class PartController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePartDto: UpdatePartDto,
   ) {
     return await this.updatePartUseCase.execute(id, updatePartDto);
@@ -88,7 +89,7 @@ export class PartController {
   @ApiResponse({ status: 204, description: 'Part deleted successfully' })
   @ApiResponse({ status: 404, description: 'Part not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.deletePartUseCase.execute(id);
   }
 }

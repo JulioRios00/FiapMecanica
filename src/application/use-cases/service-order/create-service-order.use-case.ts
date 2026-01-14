@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ServiceOrder, ServiceOrderProps } from '@domain/entities/service-order.entity';
-import { ServiceOrderRepositoryPort, ServiceOrderItem, PartOrderItem } from '@application/ports/service-order.repository.port';
+import {
+  ServiceOrderRepositoryPort,
+  ServiceOrderItem,
+  PartOrderItem,
+} from '@application/ports/service-order.repository.port';
 import { CustomerRepositoryPort } from '@application/ports/customer.repository.port';
 import { VehicleRepositoryPort } from '@application/ports/vehicle.repository.port';
 import { ServiceRepositoryPort } from '@application/ports/service.repository.port';
@@ -26,13 +30,11 @@ export class CreateServiceOrderUseCase {
   ) {}
 
   async execute(data: CreateServiceOrderInput): Promise<any> {
-    // Validate customer exists
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
 
-    // Validate vehicle exists and belongs to customer
     const vehicle = await this.vehicleRepository.findById(data.vehicleId);
     if (!vehicle) {
       throw new NotFoundException('Vehicle not found');
@@ -41,7 +43,6 @@ export class CreateServiceOrderUseCase {
       throw new BadRequestException('Vehicle does not belong to this customer');
     }
 
-    // Process services and calculate prices
     const serviceItems: ServiceOrderItem[] = [];
     let totalAmount = 0;
 
@@ -67,7 +68,6 @@ export class CreateServiceOrderUseCase {
       }
     }
 
-    // Process parts and calculate prices
     const partItems: PartOrderItem[] = [];
     if (data.parts && data.parts.length > 0) {
       for (const prt of data.parts) {
@@ -96,7 +96,6 @@ export class CreateServiceOrderUseCase {
       }
     }
 
-    // Create service order
     const serviceOrderData: ServiceOrderProps = {
       customerId: data.customerId,
       vehicleId: data.vehicleId,
@@ -106,12 +105,7 @@ export class CreateServiceOrderUseCase {
     };
 
     const serviceOrder = new ServiceOrder(serviceOrderData);
-    
-    return await this.serviceOrderRepository.create(
-      serviceOrder,
-      serviceItems,
-      partItems,
-    );
+
+    return await this.serviceOrderRepository.create(serviceOrder, serviceItems, partItems);
   }
 }
-

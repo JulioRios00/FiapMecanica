@@ -14,4 +14,3 @@ export abstract class CustomerRepositoryPort {
   abstract update(id: string, customer: Customer): Promise<Customer>;
   abstract delete(id: string): Promise<void>;
 }
-

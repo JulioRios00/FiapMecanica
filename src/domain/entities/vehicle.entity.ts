@@ -82,7 +82,6 @@ export class Vehicle {
     this.updatedAt = new Date();
   }
 
-  // Getters
   public getId(): string | undefined {
     return this.id;
   }

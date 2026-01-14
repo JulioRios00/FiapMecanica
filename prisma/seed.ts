@@ -36,7 +36,6 @@ async function main() {
     },
   });
 
-
   const customer1 = await prisma.customer.upsert({
     where: { document: '12345678909' },
     update: {},
@@ -69,8 +68,6 @@ async function main() {
     },
   });
 
-
-
   const vehicle1 = await prisma.vehicle.upsert({
     where: { licensePlate: 'ABC1234' },
     update: {},
@@ -97,10 +94,6 @@ async function main() {
     },
   });
 
-   (`✅ Created vehicles: ${vehicle1.licensePlate}, ${vehicle2.licensePlate}`);
-
-  // Create services
-   ('🔧 Creating services...');
   const services = await Promise.all([
     prisma.service.upsert({
       where: { id: 'service-oil-change' },
@@ -110,7 +103,7 @@ async function main() {
         name: 'Oil Change',
         description: 'Complete oil and filter change',
         estimatedDuration: 60,
-        price: 150.00,
+        price: 150.0,
         category: ServiceCategory.MAINTENANCE,
       },
     }),
@@ -122,7 +115,7 @@ async function main() {
         name: 'Brake Inspection',
         description: 'Complete brake system inspection',
         estimatedDuration: 45,
-        price: 80.00,
+        price: 80.0,
         category: ServiceCategory.INSPECTION,
       },
     }),
@@ -134,7 +127,7 @@ async function main() {
         name: 'Wheel Alignment',
         description: 'Front and rear wheel alignment',
         estimatedDuration: 90,
-        price: 120.00,
+        price: 120.0,
         category: ServiceCategory.ALIGNMENT,
       },
     }),
@@ -146,16 +139,12 @@ async function main() {
         name: 'Engine Diagnostics',
         description: 'Computer diagnostics for engine issues',
         estimatedDuration: 120,
-        price: 200.00,
+        price: 200.0,
         category: ServiceCategory.DIAGNOSTICS,
       },
     }),
   ]);
 
-   (`✅ Created ${services.length} services`);
-
-  // Create parts
-   ('🔩 Creating parts...');
   const parts = await Promise.all([
     prisma.part.upsert({
       where: { partNumber: 'OF-001' },
@@ -165,7 +154,7 @@ async function main() {
         description: 'High-quality oil filter',
         partNumber: 'OF-001',
         manufacturer: 'Bosch',
-        price: 45.00,
+        price: 45.0,
         stockQuantity: 50,
         minStockLevel: 10,
         unit: 'un',
@@ -179,7 +168,7 @@ async function main() {
         description: 'Front brake pad set',
         partNumber: 'BP-001',
         manufacturer: 'Brembo',
-        price: 180.00,
+        price: 180.0,
         stockQuantity: 30,
         minStockLevel: 5,
         unit: 'set',
@@ -193,7 +182,7 @@ async function main() {
         description: 'Engine air filter',
         partNumber: 'AF-001',
         manufacturer: 'Mann',
-        price: 35.00,
+        price: 35.0,
         stockQuantity: 40,
         minStockLevel: 10,
         unit: 'un',
@@ -207,7 +196,7 @@ async function main() {
         description: 'Set of 4 spark plugs',
         partNumber: 'SP-001',
         manufacturer: 'NGK',
-        price: 120.00,
+        price: 120.0,
         stockQuantity: 25,
         minStockLevel: 5,
         unit: 'set',
@@ -215,10 +204,6 @@ async function main() {
     }),
   ]);
 
-   (`✅ Created ${parts.length} parts`);
-
-  // Create sample service orders
-   ('📋 Creating service orders...');
   const order1 = await prisma.serviceOrder.create({
     data: {
       orderNumber: 'OS000001',
@@ -227,15 +212,15 @@ async function main() {
       description: 'Regular maintenance - oil change and inspection',
       status: 'RECEIVED',
       priority: Priority.NORMAL,
-      totalAmount: 195.00,
+      totalAmount: 195.0,
       createdBy: employeeUser.id,
       serviceItems: {
         create: [
           {
             serviceId: services[0].id,
             quantity: 1,
-            unitPrice: 150.00,
-            totalPrice: 150.00,
+            unitPrice: 150.0,
+            totalPrice: 150.0,
             status: 'PENDING',
           },
         ],
@@ -245,8 +230,8 @@ async function main() {
           {
             partId: parts[0].id,
             quantity: 1,
-            unitPrice: 45.00,
-            totalPrice: 45.00,
+            unitPrice: 45.0,
+            totalPrice: 45.0,
             status: 'PENDING',
           },
         ],
@@ -268,7 +253,7 @@ async function main() {
       description: 'Brake system making noise - needs inspection',
       status: 'IN_DIAGNOSIS',
       priority: Priority.HIGH,
-      totalAmount: 80.00,
+      totalAmount: 80.0,
       createdBy: employeeUser.id,
       assignedTo: employeeUser.id,
       serviceItems: {
@@ -276,8 +261,8 @@ async function main() {
           {
             serviceId: services[1].id,
             quantity: 1,
-            unitPrice: 80.00,
-            totalPrice: 80.00,
+            unitPrice: 80.0,
+            totalPrice: 80.0,
             status: 'IN_PROGRESS',
           },
         ],
@@ -298,16 +283,13 @@ async function main() {
     },
   });
 
-   (`✅ Created service orders: ${order1.orderNumber}, ${order2.orderNumber}`);
-
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error seeding database:', e);
+    console.error('Error seeding database:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-
