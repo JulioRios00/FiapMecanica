@@ -188,7 +188,7 @@ If you prefer to set up manually, follow these steps:
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/JulioRios00/FiapMecanica
 cd oficinaMecanicaProject
 ```
 
