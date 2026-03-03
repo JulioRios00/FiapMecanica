@@ -153,6 +153,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     customerId?: string;
     page?: number;
     limit?: number;
+    excludeFinalized?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;
@@ -166,6 +167,16 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     const where: any = {};
     if (params?.status) where.status = params.status;
     if (params?.customerId) where.customerId = params.customerId;
+    if (params?.excludeFinalized) {
+      where.status = {
+        ...((where.status && typeof where.status === 'string') ? { equals: where.status } : {}),
+        notIn: [
+          ServiceOrderStatus.COMPLETED,
+          ServiceOrderStatus.DELIVERED,
+          ServiceOrderStatus.CANCELLED,
+        ],
+      };
+    }
 
     const [serviceOrders, total] = await Promise.all([
       this.prisma.serviceOrder.findMany({

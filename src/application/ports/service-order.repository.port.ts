@@ -34,6 +34,7 @@ export abstract class ServiceOrderRepositoryPort {
     customerId?: string;
     page?: number;
     limit?: number;
+    excludeFinalized?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;
