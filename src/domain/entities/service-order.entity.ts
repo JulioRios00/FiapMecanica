@@ -156,6 +156,17 @@ export class ServiceOrder {
     this.updateStatus(ServiceOrderStatus.APPROVED);
   }
 
+  public reject(rejectedBy: string, reason?: string): void {
+    if (this.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
+      throw new Error('Order must be in AWAITING_APPROVAL status to be rejected');
+    }
+
+    if (reason) {
+      this.addObservation(`Rejected by ${rejectedBy}: ${reason}`);
+    }
+    this.updateStatus(ServiceOrderStatus.CANCELLED);
+  }
+
   public updateDiagnosis(diagnosis: string): void {
     this.diagnosis = diagnosis;
     this.updatedAt = new Date();
