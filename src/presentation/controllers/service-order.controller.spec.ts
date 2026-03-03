@@ -6,6 +6,7 @@ import { GetServiceOrderUseCase } from '@application/use-cases/service-order/get
 import { GetServiceExecutionMetricsUseCase } from '@application/use-cases/service-order/get-service-execution-metrics.use-case';
 import { CreateServiceOrderUseCase } from '@application/use-cases/service-order/create-service-order.use-case';
 import { ApproveServiceOrderUseCase } from '@application/use-cases/service-order/approve-service-order.use-case';
+import { UpdateStatusViaNotificationUseCase } from '@application/use-cases/service-order/update-status-via-notification.use-case';
 
 import { ServiceOrderController } from './service-order.controller';
 
@@ -36,6 +37,10 @@ describe('ServiceOrderController', () => {
     execute: jest.fn(),
   };
 
+  const mockUpdateStatusViaNotificationUseCase = {
+    execute: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ServiceOrderController],
@@ -63,6 +68,10 @@ describe('ServiceOrderController', () => {
         {
           provide: GetServiceExecutionMetricsUseCase,
           useValue: mockGetServiceExecutionMetricsUseCase,
+        },
+        {
+          provide: UpdateStatusViaNotificationUseCase,
+          useValue: mockUpdateStatusViaNotificationUseCase,
         },
       ],
     }).compile();
@@ -101,7 +110,13 @@ describe('ServiceOrderController', () => {
       const result = await controller.findAll();
 
       expect(result).toEqual(serviceOrders);
-      expect(mockListServiceOrdersUseCase.execute).toHaveBeenCalledWith({});
+      expect(mockListServiceOrdersUseCase.execute).toHaveBeenCalledWith({
+        status: undefined,
+        customerId: undefined,
+        page: undefined,
+        limit: undefined,
+        excludeFinalized: undefined,
+      });
     });
 
     it('should list service orders with filters', async () => {
@@ -113,6 +128,7 @@ describe('ServiceOrderController', () => {
         'customer-id',
         '1',
         '10',
+        'true',
       );
 
       expect(result).toEqual(serviceOrders);
@@ -121,6 +137,7 @@ describe('ServiceOrderController', () => {
         customerId: 'customer-id',
         page: 1,
         limit: 10,
+        excludeFinalized: true,
       });
     });
   });
@@ -176,6 +193,30 @@ describe('ServiceOrderController', () => {
         'order-id',
         approveDto.approvedBy,
         approveDto.approvedAmount,
+        true,
+        undefined,
+      );
+    });
+
+    it('should reject a service order', async () => {
+      const approveDto = {
+        approvedBy: 'customer-name',
+        approved: false,
+        reason: 'Too expensive',
+      };
+
+      const serviceOrder = { id: 'order-id', status: ServiceOrderStatus.CANCELLED };
+      mockApproveServiceOrderUseCase.execute.mockResolvedValue(serviceOrder);
+
+      const result = await controller.approve('order-id', approveDto);
+
+      expect(result).toEqual(serviceOrder);
+      expect(mockApproveServiceOrderUseCase.execute).toHaveBeenCalledWith(
+        'order-id',
+        approveDto.approvedBy,
+        undefined,
+        false,
+        'Too expensive',
       );
     });
   });
