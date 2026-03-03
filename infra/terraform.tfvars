@@ -1,0 +1,7 @@
+cluster_name       = "fiap-mecanica-cluster"
+kubernetes_version = "v1.29.2"
+image_name         = "fiap-mecanica:latest"
+namespace          = "fiap-mecanica"
+db_user            = "workshop"
+db_password        = "workshop123"
+db_name            = "workshop_db"
