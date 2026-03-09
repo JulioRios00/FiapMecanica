@@ -1,4 +1,6 @@
 import { ServiceOrderStatus, Priority } from '@prisma/client';
+import { Money } from '@domain/value-objects/money.value-object';
+import { InvalidStatusTransitionException } from '@shared/exceptions/invalid-status-transition.exception';
 
 
 export interface ServiceOrderProps {
@@ -13,8 +15,8 @@ export interface ServiceOrderProps {
   observations?: string;
   estimatedCompletion?: Date;
   actualCompletion?: Date;
-  totalAmount?: number;
-  approvedAmount?: number;
+  totalAmount?: Money | number;
+  approvedAmount?: Money | number;
   approvedAt?: Date;
   approvedBy?: string;
   createdBy?: string;
@@ -35,8 +37,8 @@ export class ServiceOrder {
   private observations?: string;
   private estimatedCompletion?: Date;
   private actualCompletion?: Date;
-  private totalAmount: number;
-  private approvedAmount?: number;
+  private totalAmount: Money;
+  private approvedAmount?: Money;
   private approvedAt?: Date;
   private approvedBy?: string;
   private createdBy?: string;
@@ -56,8 +58,10 @@ export class ServiceOrder {
     this.observations = props.observations;
     this.estimatedCompletion = props.estimatedCompletion;
     this.actualCompletion = props.actualCompletion;
-    this.totalAmount = props.totalAmount ?? 0;
-    this.approvedAmount = props.approvedAmount;
+    this.totalAmount = this.toMoney(props.totalAmount ?? 0);
+    this.approvedAmount = props.approvedAmount
+      ? this.toMoney(props.approvedAmount)
+      : undefined;
     this.approvedAt = props.approvedAt;
     this.approvedBy = props.approvedBy;
     this.createdBy = props.createdBy;
@@ -66,6 +70,10 @@ export class ServiceOrder {
     this.updatedAt = props.updatedAt;
 
     this.validate();
+  }
+
+  private toMoney(value: Money | number): Money {
+    return value instanceof Money ? value : new Money(value);
   }
 
   private validate(): void {
@@ -81,9 +89,7 @@ export class ServiceOrder {
       throw new Error('Description must have at least 5 characters');
     }
 
-    if (this.totalAmount < 0) {
-      throw new Error('Total amount cannot be negative');
-    }
+    // Money VO already validates non-negative amounts, so no need to check here
   }
 
   public updateStatus(newStatus: ServiceOrderStatus): void {
@@ -139,20 +145,18 @@ export class ServiceOrder {
 
     const allowedTransitions = validTransitions[currentStatus] || [];
     if (!allowedTransitions.includes(newStatus)) {
-      throw new Error(
-        `Invalid status transition from ${currentStatus} to ${newStatus}`,
-      );
+      throw new InvalidStatusTransitionException(currentStatus, newStatus);
     }
   }
 
-  public approve(approvedBy: string, amount?: number): void {
+  public approve(approvedBy: string, amount?: Money | number): void {
     if (this.status !== ServiceOrderStatus.AWAITING_APPROVAL) {
       throw new Error('Order must be in AWAITING_APPROVAL status to be approved');
     }
 
     this.approvedBy = approvedBy;
     this.approvedAt = new Date();
-    this.approvedAmount = amount ?? this.totalAmount;
+    this.approvedAmount = amount ? this.toMoney(amount) : this.totalAmount;
     this.updateStatus(ServiceOrderStatus.APPROVED);
   }
 
@@ -161,11 +165,8 @@ export class ServiceOrder {
     this.updatedAt = new Date();
   }
 
-  public updateTotalAmount(amount: number): void {
-    if (amount < 0) {
-      throw new Error('Total amount cannot be negative');
-    }
-    this.totalAmount = amount;
+  public updateTotalAmount(amount: Money | number): void {
+    this.totalAmount = this.toMoney(amount);
     this.updatedAt = new Date();
   }
 
@@ -252,11 +253,11 @@ export class ServiceOrder {
     return this.actualCompletion;
   }
 
-  public getTotalAmount(): number {
+  public getTotalAmount(): Money {
     return this.totalAmount;
   }
 
-  public getApprovedAmount(): number | undefined {
+  public getApprovedAmount(): Money | undefined {
     return this.approvedAmount;
   }
 
@@ -297,8 +298,8 @@ export class ServiceOrder {
       observations: this.observations,
       estimatedCompletion: this.estimatedCompletion,
       actualCompletion: this.actualCompletion,
-      totalAmount: this.totalAmount,
-      approvedAmount: this.approvedAmount,
+      totalAmount: this.totalAmount.toNumber(),
+      approvedAmount: this.approvedAmount?.toNumber(),
       approvedAt: this.approvedAt,
       approvedBy: this.approvedBy,
       createdBy: this.createdBy,

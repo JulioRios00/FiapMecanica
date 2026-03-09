@@ -17,8 +17,10 @@ import { ServiceRepositoryPort } from '@application/ports/service.repository.por
 import { PartRepository } from '@infrastructure/repositories/part.repository';
 import { PartRepositoryPort } from '@application/ports/part.repository.port';
 import { PrismaService } from '@infrastructure/database/prisma.service';
+import { EmailModule } from './email.module';
 
 @Module({
+  imports: [EmailModule],
   controllers: [ServiceOrderController],
   providers: [
     PrismaService,

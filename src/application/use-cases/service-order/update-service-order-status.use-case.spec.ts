@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateServiceOrderStatusUseCase } from './update-service-order-status.use-case';
 import { ServiceOrderRepositoryPort } from '@application/ports/service-order.repository.port';
+import { CustomerRepositoryPort } from '@application/ports/customer.repository.port';
+import { EmailServicePort } from '@application/ports/email.service.port';
 import { NotFoundException } from '@nestjs/common';
 import { ServiceOrder } from '@domain/entities/service-order.entity';
 import { ServiceOrderStatus } from '@prisma/client';
@@ -8,9 +10,12 @@ import { ServiceOrderStatus } from '@prisma/client';
 describe('UpdateServiceOrderStatusUseCase', () => {
   let useCase: UpdateServiceOrderStatusUseCase;
   let serviceOrderRepository: jest.Mocked<ServiceOrderRepositoryPort>;
+  let customerRepository: jest.Mocked<CustomerRepositoryPort>;
+  let emailService: jest.Mocked<EmailServicePort>;
 
   const mockServiceOrder = new ServiceOrder({
     id: '123',
+    orderNumber: 'OS000001',
     customerId: 'customer-123',
     vehicleId: 'vehicle-123',
     description: 'Oil change needed',
@@ -23,6 +28,14 @@ describe('UpdateServiceOrderStatusUseCase', () => {
       updateStatus: jest.fn(),
     };
 
+    const mockCustomerRepo = {
+      findById: jest.fn(),
+    };
+
+    const mockEmailService = {
+      sendStatusUpdateEmail: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateServiceOrderStatusUseCase,
@@ -30,11 +43,21 @@ describe('UpdateServiceOrderStatusUseCase', () => {
           provide: ServiceOrderRepositoryPort,
           useValue: mockRepository,
         },
+        {
+          provide: CustomerRepositoryPort,
+          useValue: mockCustomerRepo,
+        },
+        {
+          provide: EmailServicePort,
+          useValue: mockEmailService,
+        },
       ],
     }).compile();
 
     useCase = module.get<UpdateServiceOrderStatusUseCase>(UpdateServiceOrderStatusUseCase);
     serviceOrderRepository = module.get(ServiceOrderRepositoryPort);
+    customerRepository = module.get(CustomerRepositoryPort);
+    emailService = module.get(EmailServicePort);
   });
 
   it('should be defined', () => {

@@ -6,6 +6,7 @@ import { ServiceOrderModule } from './modules/service-order.module';
 import { VehicleModule } from './modules/vehicle.module';
 import { ServiceModule } from './modules/service.module';
 import { PartModule } from './modules/part.module';
+import { HealthModule } from './modules/health.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PartModule } from './modules/part.module';
     ServiceModule,
     PartModule,
     ServiceOrderModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

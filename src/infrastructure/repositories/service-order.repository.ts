@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ServiceOrderStatus } from '@prisma/client';
 import { ServiceOrder } from '@domain/entities/service-order.entity';
+import { Money } from '@domain/value-objects/money.value-object';
+import { compareByPriority } from '@domain/utils/service-order-priority.util';
 import {
   ServiceOrderRepositoryPort,
   ServiceOrderItem,
@@ -153,6 +155,8 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     customerId?: string;
     page?: number;
     limit?: number;
+    excludeCompleted?: boolean;
+    sortByPriority?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;
@@ -161,12 +165,57 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
   }> {
     const page = params?.page || 1;
     const limit = params?.limit || 10;
-    const skip = (page - 1) * limit;
+    const excludeCompleted = params?.excludeCompleted ?? true;
+    const sortByPriority = params?.sortByPriority ?? true;
 
     const where: any = {};
-    if (params?.status) where.status = params.status;
+    if (params?.status) {
+      where.status = params.status;
+    } else if (excludeCompleted) {
+      // Exclude COMPLETED and DELIVERED statuses
+      where.status = {
+        notIn: [ServiceOrderStatus.COMPLETED, ServiceOrderStatus.DELIVERED],
+      };
+    }
     if (params?.customerId) where.customerId = params.customerId;
 
+    // For priority sorting, we need to fetch all records first, then sort in-memory
+    // This is acceptable for reasonable dataset sizes (<10k active orders)
+    if (sortByPriority) {
+      const allOrders = await this.prisma.serviceOrder.findMany({
+        where,
+        include: {
+          customer: true,
+          vehicle: true,
+          serviceItems: {
+            include: { service: true },
+          },
+          partItems: {
+            include: { part: true },
+          },
+        },
+      });
+
+      const total = allOrders.length;
+
+      // Sort by priority using the compareByPriority function
+      const sorted = allOrders.sort((a, b) =>
+        compareByPriority(
+          { status: a.status, createdAt: a.createdAt },
+          { status: b.status, createdAt: b.createdAt },
+        ),
+      );
+
+      // Apply pagination after sorting
+      const skip = (page - 1) * limit;
+      const paginated = sorted.slice(skip, skip + limit);
+      const data = paginated.map((so) => this.mapToServiceOrder(so));
+
+      return { data, total, page, limit };
+    }
+
+    // Default behavior: database-level sorting and pagination
+    const skip = (page - 1) * limit;
     const [serviceOrders, total] = await Promise.all([
       this.prisma.serviceOrder.findMany({
         where,
@@ -366,6 +415,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
   }
 
   private mapToServiceOrder(data: any): ServiceOrder {
+    // Convert Prisma Decimal to number - ServiceOrder constructor will convert to Money VO
     return new ServiceOrder({
       id: data.id,
       orderNumber: data.orderNumber,
@@ -378,7 +428,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
       observations: data.observations || undefined,
       estimatedCompletion: data.estimatedCompletion || undefined,
       actualCompletion: data.actualCompletion || undefined,
-      totalAmount: Number(data.totalAmount),
+      totalAmount: Number(data.totalAmount), // Converted to Money VO by constructor
       approvedAmount: data.approvedAmount ? Number(data.approvedAmount) : undefined,
       approvedAt: data.approvedAt || undefined,
       approvedBy: data.approvedBy || undefined,

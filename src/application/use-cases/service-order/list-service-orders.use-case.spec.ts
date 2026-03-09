@@ -64,7 +64,10 @@ describe('ListServiceOrdersUseCase', () => {
     const result = await useCase.execute();
 
     expect(result).toEqual(paginatedResult);
-    expect(serviceOrderRepository.findAll).toHaveBeenCalledWith(undefined);
+    expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({
+      excludeCompleted: true,
+      sortByPriority: true,
+    });
   });
 
   it('should return service orders filtered by status', async () => {
@@ -80,6 +83,10 @@ describe('ListServiceOrdersUseCase', () => {
     const result = await useCase.execute({ status: 'RECEIVED' });
 
     expect(result).toEqual(paginatedResult);
-    expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({ status: 'RECEIVED' });
+    expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({
+      status: 'RECEIVED',
+      excludeCompleted: true,
+      sortByPriority: true,
+    });
   });
 });
