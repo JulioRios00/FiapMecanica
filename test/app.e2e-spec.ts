@@ -207,7 +207,7 @@ describe('Workshop API (e2e)', () => {
           name: 'Oil Change',
           description: 'Complete oil change',
           estimatedDuration: 60,
-          price: 150.00,
+          price: 150.0,
           category: ServiceCategory.MAINTENANCE,
         })
         .expect(201)
@@ -245,7 +245,7 @@ describe('Workshop API (e2e)', () => {
         .put(`/api/v1/services/${serviceId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          price: 180.00,
+          price: 180.0,
           estimatedDuration: 45,
         })
         .expect(200)
@@ -263,7 +263,7 @@ describe('Workshop API (e2e)', () => {
         .send({
           name: 'Oil Filter',
           partNumber: 'OF-12345',
-          price: 45.50,
+          price: 45.5,
           stockQuantity: 100,
           minStockLevel: 10,
         })
@@ -302,7 +302,7 @@ describe('Workshop API (e2e)', () => {
         .put(`/api/v1/parts/${partId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          price: 50.00,
+          price: 50.0,
           stockQuantity: 120,
         })
         .expect(200)
@@ -496,4 +496,3 @@ describe('Workshop API (e2e)', () => {
     });
   });
 });
-

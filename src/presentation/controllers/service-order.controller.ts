@@ -1,20 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ServiceOrderStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
@@ -102,9 +87,7 @@ export class ServiceOrderController {
   @ApiResponse({ status: 200, description: 'Status updated via notification successfully' })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Service order not found' })
-  async notifyStatusUpdate(
-    @Body() notificationDto: NotificationStatusUpdateDto,
-  ) {
+  async notifyStatusUpdate(@Body() notificationDto: NotificationStatusUpdateDto) {
     return await this.updateStatusViaNotificationUseCase.execute({
       serviceOrderId: notificationDto.serviceOrderId,
       newStatus: notificationDto.newStatus,
@@ -171,15 +154,11 @@ export class ServiceOrderController {
   @ApiResponse({ status: 200, description: 'Metrics retrieved successfully' })
   @ApiQuery({ name: 'startDate', required: false, type: Date, description: 'Filter from date' })
   @ApiQuery({ name: 'endDate', required: false, type: Date, description: 'Filter to date' })
-  async getMetrics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
+  async getMetrics(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
     const filters: any = {};
     if (startDate) filters.startDate = new Date(startDate);
     if (endDate) filters.endDate = new Date(endDate);
-    
+
     return await this.getServiceExecutionMetricsUseCase.execute(filters);
   }
 }
-

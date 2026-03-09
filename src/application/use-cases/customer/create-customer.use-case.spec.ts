@@ -42,19 +42,13 @@ describe('CreateCustomerUseCase', () => {
 
     mockCustomerRepository.findByDocument.mockResolvedValue(null);
     mockCustomerRepository.findByEmail.mockResolvedValue(null);
-    mockCustomerRepository.create.mockImplementation((customer) =>
-      Promise.resolve(customer),
-    );
+    mockCustomerRepository.create.mockImplementation((customer) => Promise.resolve(customer));
 
     const result = await useCase.execute(customerData);
 
     expect(result).toBeDefined();
-    expect(mockCustomerRepository.findByDocument).toHaveBeenCalledWith(
-      customerData.document,
-    );
-    expect(mockCustomerRepository.findByEmail).toHaveBeenCalledWith(
-      customerData.email,
-    );
+    expect(mockCustomerRepository.findByDocument).toHaveBeenCalledWith(customerData.document);
+    expect(mockCustomerRepository.findByEmail).toHaveBeenCalledWith(customerData.email);
     expect(mockCustomerRepository.create).toHaveBeenCalled();
   });
 
@@ -71,9 +65,7 @@ describe('CreateCustomerUseCase', () => {
       id: 'existing-customer',
     });
 
-    await expect(useCase.execute(customerData)).rejects.toThrow(
-      ConflictException,
-    );
+    await expect(useCase.execute(customerData)).rejects.toThrow(ConflictException);
     await expect(useCase.execute(customerData)).rejects.toThrow(
       'Customer with this document already exists',
     );
@@ -93,12 +85,7 @@ describe('CreateCustomerUseCase', () => {
       id: 'existing-customer',
     });
 
-    await expect(useCase.execute(customerData)).rejects.toThrow(
-      ConflictException,
-    );
-    await expect(useCase.execute(customerData)).rejects.toThrow(
-      'Email already in use',
-    );
+    await expect(useCase.execute(customerData)).rejects.toThrow(ConflictException);
+    await expect(useCase.execute(customerData)).rejects.toThrow('Email already in use');
   });
 });
-

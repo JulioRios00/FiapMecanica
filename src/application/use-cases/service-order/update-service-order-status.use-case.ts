@@ -13,11 +13,7 @@ export class UpdateServiceOrderStatusUseCase {
     private readonly emailService: EmailServicePort,
   ) {}
 
-  async execute(
-    id: string,
-    status: ServiceOrderStatus,
-    reason?: string,
-  ): Promise<ServiceOrder> {
+  async execute(id: string, status: ServiceOrderStatus, reason?: string): Promise<ServiceOrder> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
 
     if (!serviceOrder) {
@@ -30,12 +26,7 @@ export class UpdateServiceOrderStatusUseCase {
     const updated = await this.serviceOrderRepository.updateStatus(id, status, reason);
 
     // Send email notification to customer
-    await this.sendStatusUpdateNotification(
-      updated,
-      previousStatus,
-      status,
-      reason,
-    );
+    await this.sendStatusUpdateNotification(updated, previousStatus, status, reason);
 
     return updated;
   }
@@ -47,9 +38,7 @@ export class UpdateServiceOrderStatusUseCase {
     reason?: string,
   ): Promise<void> {
     try {
-      const customer = await this.customerRepository.findById(
-        serviceOrder.getCustomerId(),
-      );
+      const customer = await this.customerRepository.findById(serviceOrder.getCustomerId());
 
       if (customer) {
         await this.emailService.sendStatusUpdateEmail({
@@ -67,4 +56,3 @@ export class UpdateServiceOrderStatusUseCase {
     }
   }
 }
-

@@ -2,7 +2,6 @@ import { ServiceOrderStatus, Priority } from '@prisma/client';
 import { Money } from '@domain/value-objects/money.value-object';
 import { InvalidStatusTransitionException } from '@shared/exceptions/invalid-status-transition.exception';
 
-
 export interface ServiceOrderProps {
   id?: string;
   orderNumber?: string;
@@ -59,9 +58,7 @@ export class ServiceOrder {
     this.estimatedCompletion = props.estimatedCompletion;
     this.actualCompletion = props.actualCompletion;
     this.totalAmount = this.toMoney(props.totalAmount ?? 0);
-    this.approvedAmount = props.approvedAmount
-      ? this.toMoney(props.approvedAmount)
-      : undefined;
+    this.approvedAmount = props.approvedAmount ? this.toMoney(props.approvedAmount) : undefined;
     this.approvedAt = props.approvedAt;
     this.approvedBy = props.approvedBy;
     this.createdBy = props.createdBy;
@@ -211,8 +208,7 @@ export class ServiceOrder {
 
   public isCompleted(): boolean {
     return (
-      this.status === ServiceOrderStatus.COMPLETED ||
-      this.status === ServiceOrderStatus.DELIVERED
+      this.status === ServiceOrderStatus.COMPLETED || this.status === ServiceOrderStatus.DELIVERED
     );
   }
 
@@ -320,4 +316,3 @@ export class ServiceOrder {
     };
   }
 }
-

@@ -3,9 +3,7 @@ import { ServiceOrderRepositoryPort } from '@application/ports/service-order.rep
 
 @Injectable()
 export class GetServiceOrderUseCase {
-  constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepositoryPort,
-  ) {}
+  constructor(private readonly serviceOrderRepository: ServiceOrderRepositoryPort) {}
 
   async execute(id: string): Promise<any> {
     const serviceOrder = await this.serviceOrderRepository.findById(id);
@@ -17,4 +15,3 @@ export class GetServiceOrderUseCase {
     return serviceOrder;
   }
 }
-

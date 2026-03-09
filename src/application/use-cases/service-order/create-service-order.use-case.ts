@@ -58,10 +58,7 @@ export class CreateServiceOrderUseCase {
           throw new NotFoundException(`Service ${svc.serviceId} not found`);
         }
         if (!service.isActive()) {
-          throw new ServiceInactiveException(
-            svc.serviceId,
-            service.getName(),
-          );
+          throw new ServiceInactiveException(svc.serviceId, service.getName());
         }
 
         const unitPrice = service.getPrice();
@@ -84,10 +81,7 @@ export class CreateServiceOrderUseCase {
           throw new NotFoundException(`Part ${prt.partId} not found`);
         }
         if (!part.isActive()) {
-          throw new ServiceInactiveException(
-            prt.partId,
-            part.getName(),
-          );
+          throw new ServiceInactiveException(prt.partId, part.getName());
         }
         if (part.getStockQuantity() < prt.quantity) {
           throw new InsufficientStockException(

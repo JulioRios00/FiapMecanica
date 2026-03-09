@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { ServiceCategory } from '@prisma/client';
 
 export class CreateServiceDto {
@@ -20,7 +29,7 @@ export class CreateServiceDto {
   @Min(1)
   estimatedDuration: number;
 
-  @ApiProperty({ example: 150.00, description: 'Service price' })
+  @ApiProperty({ example: 150.0, description: 'Service price' })
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
@@ -35,4 +44,3 @@ export class CreateServiceDto {
   @IsEnum(ServiceCategory)
   category: ServiceCategory;
 }
-

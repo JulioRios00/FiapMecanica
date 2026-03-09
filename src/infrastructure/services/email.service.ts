@@ -13,9 +13,7 @@ export class EmailService implements EmailServicePort {
    * MVP implementation: Logs to console
    * Production: Integrate with SMTP service (Nodemailer, SendGrid, etc.)
    */
-  async sendStatusUpdateEmail(
-    input: SendStatusUpdateEmailInput,
-  ): Promise<void> {
+  async sendStatusUpdateEmail(input: SendStatusUpdateEmailInput): Promise<void> {
     try {
       // MVP: Log email details to console
       this.logger.log('='.repeat(60));
@@ -39,10 +37,7 @@ export class EmailService implements EmailServicePort {
       // });
     } catch (error) {
       // Log error but don't throw - email failures shouldn't block status updates
-      this.logger.error(
-        `Failed to send status update email for order ${input.orderNumber}`,
-        error,
-      );
+      this.logger.error(`Failed to send status update email for order ${input.orderNumber}`, error);
     }
   }
 }

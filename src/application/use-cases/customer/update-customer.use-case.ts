@@ -8,7 +8,7 @@ export class UpdateCustomerUseCase {
 
   async execute(id: string, data: Partial<CustomerProps>): Promise<Customer> {
     const existingCustomer = await this.customerRepository.findById(id);
-    
+
     if (!existingCustomer) {
       throw new NotFoundException('Customer not found');
     }
@@ -17,4 +17,3 @@ export class UpdateCustomerUseCase {
     return await this.customerRepository.update(id, existingCustomer);
   }
 }
-

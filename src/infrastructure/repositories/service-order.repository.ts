@@ -170,7 +170,11 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
       where.status = params.status;
     } else if (excludeCompleted) {
       where.status = {
-        notIn: [ServiceOrderStatus.COMPLETED, ServiceOrderStatus.DELIVERED, ServiceOrderStatus.CANCELLED],
+        notIn: [
+          ServiceOrderStatus.COMPLETED,
+          ServiceOrderStatus.DELIVERED,
+          ServiceOrderStatus.CANCELLED,
+        ],
       };
     }
     if (params?.customerId) where.customerId = params.customerId;

@@ -35,9 +35,7 @@ describe('UpdateStatusViaNotificationUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<UpdateStatusViaNotificationUseCase>(
-      UpdateStatusViaNotificationUseCase,
-    );
+    useCase = module.get<UpdateStatusViaNotificationUseCase>(UpdateStatusViaNotificationUseCase);
     serviceOrderRepository = module.get(ServiceOrderRepositoryPort);
     notificationService = module.get(NotificationPort);
   });

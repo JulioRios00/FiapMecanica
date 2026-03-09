@@ -14,4 +14,3 @@ export abstract class ServiceRepositoryPort {
   abstract update(id: string, service: Service): Promise<Service>;
   abstract delete(id: string): Promise<void>;
 }
-

@@ -35,9 +35,7 @@ const STATUS_PRIORITY: Record<ServiceOrderStatus, number> = {
 
 @Injectable()
 export class ListServiceOrdersUseCase {
-  constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepositoryPort,
-  ) {}
+  constructor(private readonly serviceOrderRepository: ServiceOrderRepositoryPort) {}
 
   async execute(params?: ListServiceOrdersInput): Promise<ListServiceOrdersOutput> {
     const excludeCompleted = params?.excludeCompleted ?? true;

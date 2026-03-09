@@ -24,7 +24,7 @@ export class CreatePartDto {
   @IsString()
   manufacturer?: string;
 
-  @ApiProperty({ example: 45.50, description: 'Part price' })
+  @ApiProperty({ example: 45.5, description: 'Part price' })
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
@@ -47,4 +47,3 @@ export class CreatePartDto {
   @IsString()
   unit?: string;
 }
-

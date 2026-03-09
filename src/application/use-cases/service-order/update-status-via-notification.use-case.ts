@@ -16,9 +16,7 @@ export class UpdateStatusViaNotificationUseCase {
     senderEmail: string;
     message?: string;
   }): Promise<any> {
-    const serviceOrder = await this.serviceOrderRepository.findById(
-      params.serviceOrderId,
-    );
+    const serviceOrder = await this.serviceOrderRepository.findById(params.serviceOrderId);
 
     if (!serviceOrder) {
       throw new NotFoundException('Service Order not found');

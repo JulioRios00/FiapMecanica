@@ -3,14 +3,14 @@ import { Money } from './money.value-object';
 describe('Money', () => {
   describe('Creation and validation', () => {
     it('should create a valid Money instance', () => {
-      expect(() => new Money(100.50)).not.toThrow();
+      expect(() => new Money(100.5)).not.toThrow();
       expect(() => new Money(0)).not.toThrow();
       expect(() => new Money(0.01)).not.toThrow();
     });
 
     it('should reject negative amounts', () => {
       expect(() => new Money(-1)).toThrow('Money amount cannot be negative');
-      expect(() => new Money(-100.50)).toThrow('Money amount cannot be negative');
+      expect(() => new Money(-100.5)).toThrow('Money amount cannot be negative');
     });
 
     it('should reject non-finite numbers', () => {
@@ -21,7 +21,7 @@ describe('Money', () => {
 
     it('should round to 2 decimal places', () => {
       const money = new Money(100.999);
-      expect(money.toNumber()).toBe(101.00);
+      expect(money.toNumber()).toBe(101.0);
 
       const money2 = new Money(100.994);
       expect(money2.toNumber()).toBe(100.99);
@@ -51,7 +51,7 @@ describe('Money', () => {
     });
 
     it('should add decimal values correctly', () => {
-      const money1 = new Money(100.50);
+      const money1 = new Money(100.5);
       const money2 = new Money(50.75);
       const result = money1.add(money2);
 
@@ -182,8 +182,8 @@ describe('Money', () => {
 
   describe('Conversion and formatting', () => {
     it('should convert to number', () => {
-      const money = new Money(100.50);
-      expect(money.toNumber()).toBe(100.50);
+      const money = new Money(100.5);
+      expect(money.toNumber()).toBe(100.5);
     });
 
     it('should get currency', () => {
@@ -221,10 +221,7 @@ describe('Money', () => {
 
     it('should maintain consistency across multiple operations', () => {
       const money = new Money(100);
-      const result = money
-        .add(new Money(50))
-        .subtract(new Money(30))
-        .multiply(2);
+      const result = money.add(new Money(50)).subtract(new Money(30)).multiply(2);
 
       expect(result.toNumber()).toBe(240);
     });

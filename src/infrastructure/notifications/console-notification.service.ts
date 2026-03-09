@@ -13,9 +13,9 @@ export class ConsoleNotificationService implements NotificationPort {
   }): Promise<void> {
     this.logger.log(
       `[EMAIL NOTIFICATION] Service Order ${params.serviceOrderId} ` +
-      `status updated to ${params.newStatus} ` +
-      `by ${params.senderEmail}` +
-      (params.message ? ` - Message: ${params.message}` : ''),
+        `status updated to ${params.newStatus} ` +
+        `by ${params.senderEmail}` +
+        (params.message ? ` - Message: ${params.message}` : ''),
     );
   }
 }

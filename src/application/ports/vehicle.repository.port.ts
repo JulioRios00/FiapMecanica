@@ -14,4 +14,3 @@ export abstract class VehicleRepositoryPort {
   abstract update(id: string, vehicle: Vehicle): Promise<Vehicle>;
   abstract delete(id: string): Promise<void>;
 }
-

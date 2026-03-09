@@ -67,13 +67,19 @@ describe('UpdateServiceOrderStatusUseCase', () => {
     const result = await useCase.execute('123', ServiceOrderStatus.IN_DIAGNOSIS);
 
     expect(serviceOrderRepository.findById).toHaveBeenCalledWith('123');
-    expect(serviceOrderRepository.updateStatus).toHaveBeenCalledWith('123', ServiceOrderStatus.IN_DIAGNOSIS, undefined);
+    expect(serviceOrderRepository.updateStatus).toHaveBeenCalledWith(
+      '123',
+      ServiceOrderStatus.IN_DIAGNOSIS,
+      undefined,
+    );
     expect(result).toBeDefined();
   });
 
   it('should throw NotFoundException when service order not found', async () => {
     serviceOrderRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('999', ServiceOrderStatus.IN_DIAGNOSIS)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('999', ServiceOrderStatus.IN_DIAGNOSIS)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

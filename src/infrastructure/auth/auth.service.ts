@@ -46,8 +46,8 @@ export class AuthService {
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
     return result;
   }
 }
-

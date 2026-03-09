@@ -100,9 +100,7 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
 
   describe('Health Check', () => {
     it('/api/v1/health (GET) - should return healthy status', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/health')
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/health').expect(200);
 
       expect(res.body.status).toBe('ok');
       expect(res.body.timestamp).toBeDefined();
@@ -168,9 +166,7 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
     });
 
     it('should exclude completed orders by default', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/service-orders')
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/service-orders').expect(200);
 
       const statuses = res.body.data.map((o: any) => o.status);
       expect(statuses).not.toContain('COMPLETED');

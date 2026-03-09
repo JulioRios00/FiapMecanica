@@ -50,14 +50,11 @@ export class ServiceController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'category', required: false, description: 'Filter by category' })
   @ApiQuery({ name: 'active', required: false, description: 'Filter by active status' })
-  async findAll(
-    @Query('category') category?: string,
-    @Query('active') active?: string,
-  ) {
+  async findAll(@Query('category') category?: string, @Query('active') active?: string) {
     const filters: any = {};
     if (category) filters.category = category;
     if (active !== undefined) filters.active = active === 'true';
-    
+
     return await this.listServicesUseCase.execute(filters);
   }
 
@@ -76,10 +73,7 @@ export class ServiceController {
   @ApiResponse({ status: 404, description: 'Service not found' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
-  ) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return await this.updateServiceUseCase.execute(id, updateServiceDto);
   }
 

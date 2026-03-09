@@ -26,4 +26,3 @@ import { PrismaService } from '@infrastructure/database/prisma.service';
   exports: [CustomerRepositoryPort],
 })
 export class CustomerModule {}
-

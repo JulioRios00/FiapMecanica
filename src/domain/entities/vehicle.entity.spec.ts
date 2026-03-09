@@ -30,10 +30,13 @@ describe('Vehicle Entity', () => {
     });
 
     it('should validate license plate format', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        licensePlate: 'INVALID',
-      })).toThrow();
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            licensePlate: 'INVALID',
+          }),
+      ).toThrow();
     });
 
     it('should accept Mercosul license plate format', () => {
@@ -47,39 +50,54 @@ describe('Vehicle Entity', () => {
 
   describe('Validation', () => {
     it('should reject brand with less than 2 characters', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        brand: 'A',
-      })).toThrow('Vehicle brand must have at least 2 characters');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            brand: 'A',
+          }),
+      ).toThrow('Vehicle brand must have at least 2 characters');
     });
 
     it('should reject empty brand', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        brand: '',
-      })).toThrow('Vehicle brand must have at least 2 characters');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            brand: '',
+          }),
+      ).toThrow('Vehicle brand must have at least 2 characters');
     });
 
     it('should reject model with less than 2 characters', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        model: 'C',
-      })).toThrow('Vehicle model must have at least 2 characters');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            model: 'C',
+          }),
+      ).toThrow('Vehicle model must have at least 2 characters');
     });
 
     it('should reject year before 1900', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        year: 1899,
-      })).toThrow('Vehicle year must be between 1900 and');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            year: 1899,
+          }),
+      ).toThrow('Vehicle year must be between 1900 and');
     });
 
     it('should reject year more than next year', () => {
       const currentYear = new Date().getFullYear();
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        year: currentYear + 2,
-      })).toThrow('Vehicle year must be between 1900 and');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            year: currentYear + 2,
+          }),
+      ).toThrow('Vehicle year must be between 1900 and');
     });
 
     it('should accept current year', () => {
@@ -101,10 +119,13 @@ describe('Vehicle Entity', () => {
     });
 
     it('should require customerId', () => {
-      expect(() => new Vehicle({
-        ...validVehicleProps,
-        customerId: '',
-      })).toThrow('Customer ID is required');
+      expect(
+        () =>
+          new Vehicle({
+            ...validVehicleProps,
+            customerId: '',
+          }),
+      ).toThrow('Customer ID is required');
     });
   });
 
@@ -126,9 +147,11 @@ describe('Vehicle Entity', () => {
 
     it('should validate updated information', () => {
       const vehicle = new Vehicle(validVehicleProps);
-      expect(() => vehicle.updateInfo({
-        brand: 'A',
-      })).toThrow('Vehicle brand must have at least 2 characters');
+      expect(() =>
+        vehicle.updateInfo({
+          brand: 'A',
+        }),
+      ).toThrow('Vehicle brand must have at least 2 characters');
     });
 
     it('should update only provided fields', () => {

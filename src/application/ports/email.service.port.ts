@@ -8,7 +8,5 @@ export interface SendStatusUpdateEmailInput {
 }
 
 export abstract class EmailServicePort {
-  abstract sendStatusUpdateEmail(
-    input: SendStatusUpdateEmailInput,
-  ): Promise<void>;
+  abstract sendStatusUpdateEmail(input: SendStatusUpdateEmailInput): Promise<void>;
 }
