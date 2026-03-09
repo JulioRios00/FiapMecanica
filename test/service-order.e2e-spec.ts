@@ -41,14 +41,17 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
     await prisma.part.deleteMany();
     await prisma.user.deleteMany();
 
+    // nosemgrep: generic-test-password — dummy credential for test DB only, not a real secret
+    const testPassword = 'E2eTest@local1';
+
     // Register and login
     await request(app.getHttpServer())
       .post('/api/v1/auth/register')
-      .send({ email: 'so-test@workshop.com', password: 'Test123!', name: 'SO Tester' });
+      .send({ email: 'so-test@workshop.com', password: testPassword, name: 'SO Tester' });
 
     const loginRes = await request(app.getHttpServer())
       .post('/api/v1/auth/login')
-      .send({ email: 'so-test@workshop.com', password: 'Test123!' });
+      .send({ email: 'so-test@workshop.com', password: testPassword });
     authToken = loginRes.body.access_token;
 
     // Create customer

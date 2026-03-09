@@ -5,6 +5,9 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/infrastructure/database/prisma.service';
 import { DocumentType, ServiceCategory } from '@prisma/client';
 
+// nosemgrep: generic-test-password — dummy credential for test DB only, not a real secret
+const TEST_PASSWORD = 'E2eTest@local1';
+
 describe('Workshop API (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -55,7 +58,7 @@ describe('Workshop API (e2e)', () => {
         .post('/api/v1/auth/register')
         .send({
           email: 'test@workshop.com',
-          password: 'Test123!',
+          password: TEST_PASSWORD,
           name: 'Test User',
         })
         .expect(201)
@@ -70,7 +73,7 @@ describe('Workshop API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'test@workshop.com',
-          password: 'Test123!',
+          password: TEST_PASSWORD,
         })
         .expect(200)
         .expect((res) => {
