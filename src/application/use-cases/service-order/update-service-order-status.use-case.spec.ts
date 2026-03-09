@@ -10,8 +10,6 @@ import { ServiceOrderStatus } from '@prisma/client';
 describe('UpdateServiceOrderStatusUseCase', () => {
   let useCase: UpdateServiceOrderStatusUseCase;
   let serviceOrderRepository: jest.Mocked<ServiceOrderRepositoryPort>;
-  let customerRepository: jest.Mocked<CustomerRepositoryPort>;
-  let emailService: jest.Mocked<EmailServicePort>;
 
   const mockServiceOrder = new ServiceOrder({
     id: '123',
@@ -56,8 +54,6 @@ describe('UpdateServiceOrderStatusUseCase', () => {
 
     useCase = module.get<UpdateServiceOrderStatusUseCase>(UpdateServiceOrderStatusUseCase);
     serviceOrderRepository = module.get(ServiceOrderRepositoryPort);
-    customerRepository = module.get(CustomerRepositoryPort);
-    emailService = module.get(EmailServicePort);
   });
 
   it('should be defined', () => {

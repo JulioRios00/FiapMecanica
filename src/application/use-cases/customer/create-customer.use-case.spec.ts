@@ -6,7 +6,6 @@ import { CustomerRepositoryPort } from '@application/ports/customer.repository.p
 
 describe('CreateCustomerUseCase', () => {
   let useCase: CreateCustomerUseCase;
-  let repository: CustomerRepositoryPort;
 
   const mockCustomerRepository = {
     create: jest.fn(),
@@ -26,7 +25,6 @@ describe('CreateCustomerUseCase', () => {
     }).compile();
 
     useCase = module.get<CreateCustomerUseCase>(CreateCustomerUseCase);
-    repository = module.get<CustomerRepositoryPort>(CustomerRepositoryPort);
   });
 
   afterEach(() => {

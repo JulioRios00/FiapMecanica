@@ -111,7 +111,6 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
   });
 
   describe('Priority-Based Sorting', () => {
-    let orderReceived: string;
     let orderInDiagnosis: string;
     let orderInProgress: string;
 
@@ -138,7 +137,7 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
       };
 
       // Create 3 orders and advance them to different statuses
-      orderReceived = await createOrder();
+      await createOrder(); // RECEIVED status — used to verify sort order
 
       orderInDiagnosis = await createOrder();
       await advanceStatus(orderInDiagnosis, 'IN_DIAGNOSIS');

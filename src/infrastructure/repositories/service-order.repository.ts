@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ServiceOrderStatus } from '@prisma/client';
 import { ServiceOrder } from '@domain/entities/service-order.entity';
-import { Money } from '@domain/value-objects/money.value-object';
 import {
   ServiceOrderRepositoryPort,
   ServiceOrderItem,
