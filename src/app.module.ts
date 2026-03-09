@@ -14,6 +14,7 @@ import { HealthModule } from './modules/health.module';
       isGlobal: true,
     }),
     AuthModule,
+    HealthModule,
     CustomerModule,
     VehicleModule,
     ServiceModule,

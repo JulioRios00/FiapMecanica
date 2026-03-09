@@ -35,7 +35,6 @@ export abstract class ServiceOrderRepositoryPort {
     page?: number;
     limit?: number;
     excludeCompleted?: boolean;
-    sortByPriority?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;

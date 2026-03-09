@@ -21,6 +21,18 @@ export interface ListServiceOrdersOutput {
   limit: number;
 }
 
+const STATUS_PRIORITY: Record<ServiceOrderStatus, number> = {
+  [ServiceOrderStatus.IN_PROGRESS]: 1,
+  [ServiceOrderStatus.AWAITING_APPROVAL]: 2,
+  [ServiceOrderStatus.IN_DIAGNOSIS]: 3,
+  [ServiceOrderStatus.RECEIVED]: 4,
+  [ServiceOrderStatus.APPROVED]: 5,
+  [ServiceOrderStatus.AWAITING_PARTS]: 6,
+  [ServiceOrderStatus.COMPLETED]: 7,
+  [ServiceOrderStatus.DELIVERED]: 8,
+  [ServiceOrderStatus.CANCELLED]: 9,
+};
+
 @Injectable()
 export class ListServiceOrdersUseCase {
   constructor(
@@ -28,15 +40,32 @@ export class ListServiceOrdersUseCase {
   ) {}
 
   async execute(params?: ListServiceOrdersInput): Promise<ListServiceOrdersOutput> {
-    // Default: exclude completed orders and sort by priority
     const excludeCompleted = params?.excludeCompleted ?? true;
     const sortByPriority = params?.sortByPriority ?? true;
 
-    return await this.serviceOrderRepository.findAll({
-      ...params,
+    const result = await this.serviceOrderRepository.findAll({
+      status: params?.status,
+      customerId: params?.customerId,
+      page: params?.page,
+      limit: params?.limit,
       excludeCompleted,
-      sortByPriority,
     });
+
+    if (sortByPriority) {
+      result.data.sort((a, b) => {
+        const priorityA = STATUS_PRIORITY[a.getStatus()] ?? 99;
+        const priorityB = STATUS_PRIORITY[b.getStatus()] ?? 99;
+
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+
+        const dateA = a.getCreatedAt()?.getTime() ?? 0;
+        const dateB = b.getCreatedAt()?.getTime() ?? 0;
+        return dateA - dateB;
+      });
+    }
+
+    return result;
   }
 }
-
