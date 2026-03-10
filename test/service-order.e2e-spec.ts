@@ -144,7 +144,7 @@ describe('Service Orders - Priority Sorting & Health (e2e)', () => {
       await advanceStatus(orderInProgress, 'IN_DIAGNOSIS');
       await request(app.getHttpServer())
         .post(`/api/v1/service-orders/${orderInProgress}/approve`)
-        .send({ customerId });
+        .send({ approvedBy: customerId });
       await advanceStatus(orderInProgress, 'IN_PROGRESS');
     });
 

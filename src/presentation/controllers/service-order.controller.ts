@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ServiceOrderStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
@@ -125,10 +125,9 @@ export class ServiceOrderController {
   }
 
   @Post(':id/approve')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Approve or reject service order (protected endpoint - requires authentication)',
+    summary: 'Approve or reject service order (public endpoint for customer approval)',
   })
   @ApiResponse({ status: 200, description: 'Service order approved/rejected successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
