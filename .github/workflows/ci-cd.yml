@@ -50,7 +50,7 @@ jobs:
         run: npx prisma generate
 
       - name: Run database migrations
-        run: npx prisma migrate deploy
+        run: npx prisma db push
 
       - name: Build application
         run: npm run build
