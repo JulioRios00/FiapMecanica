@@ -5,6 +5,9 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/infrastructure/database/prisma.service';
 import { DocumentType, ServiceCategory } from '@prisma/client';
 
+// nosemgrep: generic-test-password — dummy credential for test DB only, not a real secret
+const TEST_PASSWORD = 'E2eTest@local1';
+
 describe('Workshop API (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -55,7 +58,7 @@ describe('Workshop API (e2e)', () => {
         .post('/api/v1/auth/register')
         .send({
           email: 'test@workshop.com',
-          password: 'Test123!',
+          password: TEST_PASSWORD,
           name: 'Test User',
         })
         .expect(201)
@@ -70,7 +73,7 @@ describe('Workshop API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'test@workshop.com',
-          password: 'Test123!',
+          password: TEST_PASSWORD,
         })
         .expect(200)
         .expect((res) => {
@@ -204,7 +207,7 @@ describe('Workshop API (e2e)', () => {
           name: 'Oil Change',
           description: 'Complete oil change',
           estimatedDuration: 60,
-          price: 150.00,
+          price: 150.0,
           category: ServiceCategory.MAINTENANCE,
         })
         .expect(201)
@@ -242,7 +245,7 @@ describe('Workshop API (e2e)', () => {
         .put(`/api/v1/services/${serviceId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          price: 180.00,
+          price: 180.0,
           estimatedDuration: 45,
         })
         .expect(200)
@@ -260,7 +263,7 @@ describe('Workshop API (e2e)', () => {
         .send({
           name: 'Oil Filter',
           partNumber: 'OF-12345',
-          price: 45.50,
+          price: 45.5,
           stockQuantity: 100,
           minStockLevel: 10,
         })
@@ -299,7 +302,7 @@ describe('Workshop API (e2e)', () => {
         .put(`/api/v1/parts/${partId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          price: 50.00,
+          price: 50.0,
           stockQuantity: 120,
         })
         .expect(200)
@@ -362,25 +365,27 @@ describe('Workshop API (e2e)', () => {
         });
     });
 
-    it('/api/v1/service-orders/:id/status (PUT)', () => {
-      return request(app.getHttpServer())
+    it('/api/v1/service-orders/:id/status (PUT)', async () => {
+      await request(app.getHttpServer())
         .put(`/api/v1/service-orders/${serviceOrderId}/status`)
         .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          status: 'IN_DIAGNOSIS',
-          reason: 'Starting vehicle diagnosis',
-        })
-        .expect(200)
-        .expect((res) => {
-          expect(res.body.status).toBe('IN_DIAGNOSIS');
-        });
+        .send({ status: 'IN_DIAGNOSIS', reason: 'Starting vehicle diagnosis' })
+        .expect(200);
+
+      const res = await request(app.getHttpServer())
+        .put(`/api/v1/service-orders/${serviceOrderId}/status`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ status: 'AWAITING_APPROVAL', reason: 'Diagnosis complete' })
+        .expect(200);
+
+      expect(res.body.status).toBe('AWAITING_APPROVAL');
     });
 
     it('/api/v1/service-orders/:id/approve (POST) - public endpoint', () => {
       return request(app.getHttpServer())
         .post(`/api/v1/service-orders/${serviceOrderId}/approve`)
         .send({
-          customerId,
+          approvedBy: customerId,
         })
         .expect(200)
         .expect((res) => {
@@ -405,28 +410,28 @@ describe('Workshop API (e2e)', () => {
       return request(app.getHttpServer())
         .delete(`/api/v1/parts/${partId}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .expect(204);
     });
 
     it('/api/v1/services/:id (DELETE)', () => {
       return request(app.getHttpServer())
         .delete(`/api/v1/services/${serviceId}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .expect(204);
     });
 
     it('/api/v1/vehicles/:id (DELETE)', () => {
       return request(app.getHttpServer())
         .delete(`/api/v1/vehicles/${vehicleId}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .expect(204);
     });
 
     it('/api/v1/customers/:id (DELETE)', () => {
       return request(app.getHttpServer())
         .delete(`/api/v1/customers/${customerId}`)
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .expect(204);
     });
   });
 
@@ -460,7 +465,7 @@ describe('Workshop API (e2e)', () => {
 
     it('should return 404 for non-existent resource', () => {
       return request(app.getHttpServer())
-        .get('/api/v1/customers/non-existent-id')
+        .get('/api/v1/customers/00000000-0000-0000-0000-000000000000')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
@@ -493,4 +498,3 @@ describe('Workshop API (e2e)', () => {
     });
   });
 });
-

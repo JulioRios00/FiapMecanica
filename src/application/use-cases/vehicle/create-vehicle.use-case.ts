@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Vehicle, VehicleProps } from '@domain/entities/vehicle.entity';
 import { VehicleRepositoryPort } from '@application/ports/vehicle.repository.port';
 import { CustomerRepositoryPort } from '@application/ports/customer.repository.port';
@@ -22,7 +22,14 @@ export class CreateVehicleUseCase {
       throw new ConflictException('Vehicle with this license plate already exists');
     }
 
-    const vehicle = new Vehicle(data);
-    return await this.vehicleRepository.create(vehicle);
+    try {
+      const vehicle = new Vehicle(data);
+      return await this.vehicleRepository.create(vehicle);
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof ConflictException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message);
+    }
   }
 }

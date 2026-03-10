@@ -1,20 +1,25 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Priority } from '@prisma/client';
 import { ServiceOrder, ServiceOrderProps } from '@domain/entities/service-order.entity';
 import {
   ServiceOrderRepositoryPort,
   ServiceOrderItem,
   PartOrderItem,
+  ServiceOrderWithDetails,
 } from '@application/ports/service-order.repository.port';
 import { CustomerRepositoryPort } from '@application/ports/customer.repository.port';
 import { VehicleRepositoryPort } from '@application/ports/vehicle.repository.port';
 import { ServiceRepositoryPort } from '@application/ports/service.repository.port';
 import { PartRepositoryPort } from '@application/ports/part.repository.port';
+import { VehicleOwnershipException } from '@shared/exceptions/vehicle-ownership.exception';
+import { InsufficientStockException } from '@shared/exceptions/insufficient-stock.exception';
+import { ServiceInactiveException } from '@shared/exceptions/service-inactive.exception';
 
 interface CreateServiceOrderInput {
   customerId: string;
   vehicleId: string;
   description: string;
-  priority?: any;
+  priority?: Priority;
   services?: Array<{ serviceId: string; quantity: number }>;
   parts?: Array<{ partId: string; quantity: number }>;
 }
@@ -29,7 +34,7 @@ export class CreateServiceOrderUseCase {
     private readonly partRepository: PartRepositoryPort,
   ) {}
 
-  async execute(data: CreateServiceOrderInput): Promise<any> {
+  async execute(data: CreateServiceOrderInput): Promise<ServiceOrderWithDetails> {
     const customer = await this.customerRepository.findById(data.customerId);
     if (!customer) {
       throw new NotFoundException('Customer not found');
@@ -40,7 +45,7 @@ export class CreateServiceOrderUseCase {
       throw new NotFoundException('Vehicle not found');
     }
     if (vehicle.getCustomerId() !== data.customerId) {
-      throw new BadRequestException('Vehicle does not belong to this customer');
+      throw new VehicleOwnershipException(data.vehicleId, data.customerId);
     }
 
     const serviceItems: ServiceOrderItem[] = [];
@@ -53,7 +58,7 @@ export class CreateServiceOrderUseCase {
           throw new NotFoundException(`Service ${svc.serviceId} not found`);
         }
         if (!service.isActive()) {
-          throw new BadRequestException(`Service ${service.getName()} is not active`);
+          throw new ServiceInactiveException(svc.serviceId, service.getName());
         }
 
         const unitPrice = service.getPrice();
@@ -76,11 +81,13 @@ export class CreateServiceOrderUseCase {
           throw new NotFoundException(`Part ${prt.partId} not found`);
         }
         if (!part.isActive()) {
-          throw new BadRequestException(`Part ${part.getName()} is not active`);
+          throw new ServiceInactiveException(prt.partId, part.getName());
         }
         if (part.getStockQuantity() < prt.quantity) {
-          throw new BadRequestException(
-            `Insufficient stock for part ${part.getName()}. Available: ${part.getStockQuantity()}`,
+          throw new InsufficientStockException(
+            part.getName(),
+            prt.quantity,
+            part.getStockQuantity(),
           );
         }
 

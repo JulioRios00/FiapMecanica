@@ -1,6 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { ServiceOrderStatus } from '@prisma/client';
-import { ServiceOrderRepositoryPort } from '@application/ports/service-order.repository.port';
+import {
+  ServiceOrderRepositoryPort,
+  ServiceOrderWithDetails,
+} from '@application/ports/service-order.repository.port';
+
+export interface ListServiceOrdersInput {
+  status?: ServiceOrderStatus;
+  customerId?: string;
+  page?: number;
+  limit?: number;
+  excludeCompleted?: boolean;
+  sortByPriority?: boolean;
+}
+
+export interface ListServiceOrdersOutput {
+  data: ServiceOrderWithDetails[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 const STATUS_PRIORITY: Record<ServiceOrderStatus, number> = {
   [ServiceOrderStatus.IN_PROGRESS]: 1,
@@ -16,36 +35,34 @@ const STATUS_PRIORITY: Record<ServiceOrderStatus, number> = {
 
 @Injectable()
 export class ListServiceOrdersUseCase {
-  constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepositoryPort,
-  ) {}
+  constructor(private readonly serviceOrderRepository: ServiceOrderRepositoryPort) {}
 
-  async execute(params?: {
-    status?: ServiceOrderStatus;
-    customerId?: string;
-    page?: number;
-    limit?: number;
-    excludeFinalized?: boolean;
-  }): Promise<any> {
-    const excludeFinalized = params?.excludeFinalized ?? true;
+  async execute(params?: ListServiceOrdersInput): Promise<ListServiceOrdersOutput> {
+    const excludeCompleted = params?.excludeCompleted ?? true;
+    const sortByPriority = params?.sortByPriority ?? true;
 
     const result = await this.serviceOrderRepository.findAll({
-      ...params,
-      excludeFinalized,
+      status: params?.status,
+      customerId: params?.customerId,
+      page: params?.page,
+      limit: params?.limit,
+      excludeCompleted,
     });
 
-    result.data.sort((a, b) => {
-      const priorityA = STATUS_PRIORITY[a.getStatus()] ?? 99;
-      const priorityB = STATUS_PRIORITY[b.getStatus()] ?? 99;
+    if (sortByPriority) {
+      result.data.sort((a, b) => {
+        const priorityA = STATUS_PRIORITY[a.getStatus()] ?? 99;
+        const priorityB = STATUS_PRIORITY[b.getStatus()] ?? 99;
 
-      if (priorityA !== priorityB) {
-        return priorityA - priorityB;
-      }
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
 
-      const dateA = a.getCreatedAt()?.getTime() ?? 0;
-      const dateB = b.getCreatedAt()?.getTime() ?? 0;
-      return dateA - dateB;
-    });
+        const dateA = a.getCreatedAt()?.getTime() ?? 0;
+        const dateB = b.getCreatedAt()?.getTime() ?? 0;
+        return dateA - dateB;
+      });
+    }
 
     return result;
   }

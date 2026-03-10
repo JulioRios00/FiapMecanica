@@ -4,9 +4,7 @@ import { ServiceOrderRepositoryPort } from '@application/ports/service-order.rep
 
 @Injectable()
 export class ApproveServiceOrderUseCase {
-  constructor(
-    private readonly serviceOrderRepository: ServiceOrderRepositoryPort,
-  ) {}
+  constructor(private readonly serviceOrderRepository: ServiceOrderRepositoryPort) {}
 
   async execute(
     id: string,

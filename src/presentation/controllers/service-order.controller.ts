@@ -1,20 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ServiceOrderStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
@@ -63,11 +48,18 @@ export class ServiceOrderController {
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({
-    name: 'excludeFinalized',
+    name: 'excludeCompleted',
     required: false,
     type: Boolean,
     example: true,
-    description: 'Exclude finalized orders (COMPLETED, DELIVERED, CANCELLED). Defaults to true.',
+    description: 'Exclude completed/delivered/cancelled orders. Defaults to true.',
+  })
+  @ApiQuery({
+    name: 'sortByPriority',
+    required: false,
+    type: Boolean,
+    example: true,
+    description: 'Sort orders by status priority (IN_PROGRESS first). Defaults to true.',
   })
   @ApiResponse({ status: 200, description: 'Service orders retrieved successfully' })
   async findAll(
@@ -75,14 +67,16 @@ export class ServiceOrderController {
     @Query('customerId') customerId?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('excludeFinalized') excludeFinalized?: string,
+    @Query('excludeCompleted') excludeCompleted?: string,
+    @Query('sortByPriority') sortByPriority?: string,
   ) {
     return await this.listServiceOrdersUseCase.execute({
       status,
       customerId,
       page: page ? parseInt(page) : undefined,
       limit: limit ? parseInt(limit) : undefined,
-      excludeFinalized: excludeFinalized !== undefined ? excludeFinalized !== 'false' : undefined,
+      excludeCompleted: excludeCompleted !== undefined ? excludeCompleted !== 'false' : undefined,
+      sortByPriority: sortByPriority !== undefined ? sortByPriority !== 'false' : undefined,
     });
   }
 
@@ -93,9 +87,7 @@ export class ServiceOrderController {
   @ApiResponse({ status: 200, description: 'Status updated via notification successfully' })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   @ApiResponse({ status: 404, description: 'Service order not found' })
-  async notifyStatusUpdate(
-    @Body() notificationDto: NotificationStatusUpdateDto,
-  ) {
+  async notifyStatusUpdate(@Body() notificationDto: NotificationStatusUpdateDto) {
     return await this.updateStatusViaNotificationUseCase.execute({
       serviceOrderId: notificationDto.serviceOrderId,
       newStatus: notificationDto.newStatus,
@@ -133,10 +125,9 @@ export class ServiceOrderController {
   }
 
   @Post(':id/approve')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Approve or reject service order (protected endpoint - requires authentication)',
+    summary: 'Approve or reject service order (public endpoint for customer approval)',
   })
   @ApiResponse({ status: 200, description: 'Service order approved/rejected successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -162,15 +153,11 @@ export class ServiceOrderController {
   @ApiResponse({ status: 200, description: 'Metrics retrieved successfully' })
   @ApiQuery({ name: 'startDate', required: false, type: Date, description: 'Filter from date' })
   @ApiQuery({ name: 'endDate', required: false, type: Date, description: 'Filter to date' })
-  async getMetrics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
+  async getMetrics(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
     const filters: any = {};
     if (startDate) filters.startDate = new Date(startDate);
     if (endDate) filters.endDate = new Date(endDate);
-    
+
     return await this.getServiceExecutionMetricsUseCase.execute(filters);
   }
 }
-

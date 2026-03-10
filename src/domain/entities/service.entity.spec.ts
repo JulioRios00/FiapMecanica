@@ -6,7 +6,7 @@ describe('Service Entity', () => {
     name: 'Oil Change',
     description: 'Complete oil and filter change',
     estimatedDuration: 30,
-    price: 150.00,
+    price: 150.0,
     category: ServiceCategory.MAINTENANCE,
   };
 
@@ -16,7 +16,7 @@ describe('Service Entity', () => {
       expect(service).toBeDefined();
       expect(service.getName()).toBe('Oil Change');
       expect(service.getEstimatedDuration()).toBe(30);
-      expect(service.getPrice()).toBe(150.00);
+      expect(service.getPrice()).toBe(150.0);
       expect(service.getCategory()).toBe(ServiceCategory.MAINTENANCE);
       expect(service.isActive()).toBe(true);
     });
@@ -39,38 +39,53 @@ describe('Service Entity', () => {
 
   describe('Validation', () => {
     it('should reject name with less than 3 characters', () => {
-      expect(() => new Service({
-        ...validServiceProps,
-        name: 'AB',
-      })).toThrow('Service name must have at least 3 characters');
+      expect(
+        () =>
+          new Service({
+            ...validServiceProps,
+            name: 'AB',
+          }),
+      ).toThrow('Service name must have at least 3 characters');
     });
 
     it('should reject empty name', () => {
-      expect(() => new Service({
-        ...validServiceProps,
-        name: '',
-      })).toThrow('Service name must have at least 3 characters');
+      expect(
+        () =>
+          new Service({
+            ...validServiceProps,
+            name: '',
+          }),
+      ).toThrow('Service name must have at least 3 characters');
     });
 
     it('should reject zero estimated duration', () => {
-      expect(() => new Service({
-        ...validServiceProps,
-        estimatedDuration: 0,
-      })).toThrow('Estimated duration must be greater than 0');
+      expect(
+        () =>
+          new Service({
+            ...validServiceProps,
+            estimatedDuration: 0,
+          }),
+      ).toThrow('Estimated duration must be greater than 0');
     });
 
     it('should reject negative estimated duration', () => {
-      expect(() => new Service({
-        ...validServiceProps,
-        estimatedDuration: -10,
-      })).toThrow('Estimated duration must be greater than 0');
+      expect(
+        () =>
+          new Service({
+            ...validServiceProps,
+            estimatedDuration: -10,
+          }),
+      ).toThrow('Estimated duration must be greater than 0');
     });
 
     it('should reject negative price', () => {
-      expect(() => new Service({
-        ...validServiceProps,
-        price: -50,
-      })).toThrow('Price cannot be negative');
+      expect(
+        () =>
+          new Service({
+            ...validServiceProps,
+            price: -50,
+          }),
+      ).toThrow('Price cannot be negative');
     });
 
     it('should accept price of zero', () => {
@@ -98,9 +113,11 @@ describe('Service Entity', () => {
 
     it('should validate updated information', () => {
       const service = new Service(validServiceProps);
-      expect(() => service.updateInfo({
-        name: 'AB',
-      })).toThrow('Service name must have at least 3 characters');
+      expect(() =>
+        service.updateInfo({
+          name: 'AB',
+        }),
+      ).toThrow('Service name must have at least 3 characters');
     });
 
     it('should update only provided fields', () => {
@@ -170,7 +187,7 @@ describe('Service Entity', () => {
         ServiceCategory.BODYWORK,
       ];
 
-      categories.forEach(category => {
+      categories.forEach((category) => {
         const service = new Service({
           ...validServiceProps,
           category,
@@ -188,7 +205,7 @@ describe('Service Entity', () => {
       expect(json).toHaveProperty('name', 'Oil Change');
       expect(json).toHaveProperty('description', 'Complete oil and filter change');
       expect(json).toHaveProperty('estimatedDuration', 30);
-      expect(json).toHaveProperty('price', 150.00);
+      expect(json).toHaveProperty('price', 150.0);
       expect(json).toHaveProperty('category', ServiceCategory.MAINTENANCE);
       expect(json).toHaveProperty('active', true);
     });

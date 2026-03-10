@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Max, Min, MinLength } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class CreateVehicleDto {
   @ApiProperty({ example: 'ABC1234', description: 'Vehicle license plate' })
@@ -41,4 +50,3 @@ export class CreateVehicleDto {
   @IsUUID()
   customerId: string;
 }
-

@@ -20,7 +20,7 @@ import { HealthModule } from './modules/health.module';
     ServiceModule,
     PartModule,
     ServiceOrderModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
-

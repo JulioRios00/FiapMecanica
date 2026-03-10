@@ -50,14 +50,11 @@ export class PartController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'active', required: false, description: 'Filter by active status' })
   @ApiQuery({ name: 'lowStock', required: false, description: 'Filter parts with low stock' })
-  async findAll(
-    @Query('active') active?: string,
-    @Query('lowStock') lowStock?: string,
-  ) {
+  async findAll(@Query('active') active?: string, @Query('lowStock') lowStock?: string) {
     const filters: any = {};
     if (active !== undefined) filters.active = active === 'true';
     if (lowStock !== undefined) filters.lowStock = lowStock === 'true';
-    
+
     return await this.listPartsUseCase.execute(filters);
   }
 
@@ -76,10 +73,7 @@ export class PartController {
   @ApiResponse({ status: 404, description: 'Part not found' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updatePartDto: UpdatePartDto,
-  ) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updatePartDto: UpdatePartDto) {
     return await this.updatePartUseCase.execute(id, updatePartDto);
   }
 

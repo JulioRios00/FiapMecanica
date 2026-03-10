@@ -1,0 +1,3 @@
+version: 2
+ignore-known-secrets:
+  - id: 23045478 # Generic Password in test/service-order.e2e-spec.ts — dummy credential for throwaway test DB, not a real secret

@@ -15,4 +15,3 @@ export class ListCustomersUseCase {
     return await this.customerRepository.findAll(params);
   }
 }
-

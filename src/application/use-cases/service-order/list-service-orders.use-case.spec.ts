@@ -54,7 +54,7 @@ describe('ListServiceOrdersUseCase', () => {
     expect(useCase).toBeDefined();
   });
 
-  it('should return all service orders with excludeFinalized defaulting to true', async () => {
+  it('should return all service orders with excludeCompleted defaulting to true', async () => {
     const paginatedResult = {
       data: [...mockServiceOrders],
       total: mockServiceOrders.length,
@@ -66,7 +66,7 @@ describe('ListServiceOrdersUseCase', () => {
     const result = await useCase.execute();
 
     expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({
-      excludeFinalized: true,
+      excludeCompleted: true,
     });
     expect(result.data).toBeDefined();
   });
@@ -86,7 +86,7 @@ describe('ListServiceOrdersUseCase', () => {
     expect(result).toEqual(paginatedResult);
     expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({
       status: ServiceOrderStatus.RECEIVED,
-      excludeFinalized: true,
+      excludeCompleted: true,
     });
   });
 
@@ -165,7 +165,7 @@ describe('ListServiceOrdersUseCase', () => {
     expect(result.data[1].getId()).toBe('2');
   });
 
-  it('should allow excluding finalized to be set to false', async () => {
+  it('should allow excludeCompleted to be set to false', async () => {
     const paginatedResult = {
       data: [...mockServiceOrders],
       total: mockServiceOrders.length,
@@ -174,10 +174,10 @@ describe('ListServiceOrdersUseCase', () => {
     };
     serviceOrderRepository.findAll.mockResolvedValue(paginatedResult);
 
-    await useCase.execute({ excludeFinalized: false });
+    await useCase.execute({ excludeCompleted: false });
 
     expect(serviceOrderRepository.findAll).toHaveBeenCalledWith({
-      excludeFinalized: false,
+      excludeCompleted: false,
     });
   });
 });

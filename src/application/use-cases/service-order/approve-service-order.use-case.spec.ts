@@ -86,13 +86,7 @@ describe('ApproveServiceOrderUseCase', () => {
     serviceOrderRepository.findById.mockResolvedValue(mockAwaitingApproval);
     serviceOrderRepository.updateStatus.mockResolvedValue(mockAwaitingApproval);
 
-    const result = await useCase.execute(
-      '123',
-      'customer-123',
-      undefined,
-      false,
-      'Too expensive',
-    );
+    const result = await useCase.execute('123', 'customer-123', undefined, false, 'Too expensive');
 
     expect(serviceOrderRepository.findById).toHaveBeenCalledWith('123');
     expect(serviceOrderRepository.updateStatus).toHaveBeenCalledWith(

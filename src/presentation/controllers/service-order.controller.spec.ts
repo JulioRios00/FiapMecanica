@@ -115,7 +115,8 @@ describe('ServiceOrderController', () => {
         customerId: undefined,
         page: undefined,
         limit: undefined,
-        excludeFinalized: undefined,
+        excludeCompleted: undefined,
+        sortByPriority: undefined,
       });
     });
 
@@ -137,7 +138,8 @@ describe('ServiceOrderController', () => {
         customerId: 'customer-id',
         page: 1,
         limit: 10,
-        excludeFinalized: true,
+        excludeCompleted: true,
+        sortByPriority: undefined,
       });
     });
   });

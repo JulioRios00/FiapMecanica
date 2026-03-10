@@ -113,11 +113,7 @@ export class CustomerRepository implements CustomerRepositoryPort {
     });
   }
 
-  async findAll(params?: {
-    active?: boolean;
-    page?: number;
-    limit?: number;
-  }): Promise<{
+  async findAll(params?: { active?: boolean; page?: number; limit?: number }): Promise<{
     data: Customer[];
     total: number;
     page: number;
@@ -203,4 +199,3 @@ export class CustomerRepository implements CustomerRepositoryPort {
     });
   }
 }
-

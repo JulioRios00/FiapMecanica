@@ -28,7 +28,7 @@ export class UpdatePartDto {
 
   @ApiPropertyOptional({
     description: 'Part price',
-    example: 45.50,
+    example: 45.5,
     minimum: 0,
   })
   @IsNumber()

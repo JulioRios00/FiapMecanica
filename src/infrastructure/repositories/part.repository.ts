@@ -114,11 +114,7 @@ export class PartRepository implements PartRepositoryPort {
     );
   }
 
-  async findAll(params?: {
-    active?: boolean;
-    page?: number;
-    limit?: number;
-  }): Promise<{
+  async findAll(params?: { active?: boolean; page?: number; limit?: number }): Promise<{
     data: Part[];
     total: number;
     page: number;
@@ -202,4 +198,3 @@ export class PartRepository implements PartRepositoryPort {
     });
   }
 }
-

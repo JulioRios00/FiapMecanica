@@ -20,4 +20,3 @@ export class UpdateServiceOrderStatusDto {
   @IsString()
   reason?: string;
 }
-

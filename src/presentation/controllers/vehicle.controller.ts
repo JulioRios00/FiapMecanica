@@ -50,14 +50,11 @@ export class VehicleController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'customerId', required: false, description: 'Filter by customer ID' })
   @ApiQuery({ name: 'active', required: false, description: 'Filter by active status' })
-  async findAll(
-    @Query('customerId') customerId?: string,
-    @Query('active') active?: string,
-  ) {
+  async findAll(@Query('customerId') customerId?: string, @Query('active') active?: string) {
     const filters: any = {};
     if (customerId) filters.customerId = customerId;
     if (active !== undefined) filters.active = active === 'true';
-    
+
     return await this.listVehiclesUseCase.execute(filters);
   }
 
@@ -76,10 +73,7 @@ export class VehicleController {
   @ApiResponse({ status: 404, description: 'Vehicle not found' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateVehicleDto: UpdateVehicleDto,
-  ) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
     return await this.updateVehicleUseCase.execute(id, updateVehicleDto);
   }
 

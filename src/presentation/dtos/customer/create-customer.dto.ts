@@ -56,4 +56,3 @@ export class CreateCustomerDto {
   @IsString()
   zipCode?: string;
 }
-

@@ -18,7 +18,7 @@ export class ApproveServiceOrderDto {
   approved?: boolean;
 
   @ApiProperty({
-    example: 500.00,
+    example: 500.0,
     required: false,
     description: 'Approved amount (optional, defaults to total)',
   })

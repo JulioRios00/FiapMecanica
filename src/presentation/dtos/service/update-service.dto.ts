@@ -31,7 +31,7 @@ export class UpdateServiceDto {
 
   @ApiPropertyOptional({
     description: 'Service price',
-    example: 150.00,
+    example: 150.0,
     minimum: 0,
   })
   @IsNumber()
