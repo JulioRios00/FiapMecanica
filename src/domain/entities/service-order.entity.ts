@@ -85,8 +85,6 @@ export class ServiceOrder {
     if (!this.description || this.description.trim().length < 5) {
       throw new Error('Description must have at least 5 characters');
     }
-
-    // Money VO already validates non-negative amounts, so no need to check here
   }
 
   public updateStatus(newStatus: ServiceOrderStatus): void {

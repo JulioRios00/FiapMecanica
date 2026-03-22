@@ -137,30 +137,35 @@ Comprehensive architecture diagrams are available in PlantUML format (`.wsd` fil
 ## Features
 
 ### Customer Management
+
 - CRUD operations for customers
 - CPF/CNPJ validation
 - Customer search and filtering
 - Soft delete support
 
 ### Vehicle Management
+
 - CRUD operations for vehicles
 - License plate validation (Brazilian format)
 - Vehicle history tracking
 - Customer-vehicle relationship
 
 ### Service Catalog
+
 - Service management
 - Category classification
 - Price and duration estimation
 - Active/inactive status
 
 ### Parts & Inventory
+
 - Parts catalog management
 - Stock control
 - Low stock alerts
 - Stock movement history
 
 ### Service Orders (OS)
+
 - Complete service order lifecycle
 - Priority-based listing (In Progress > Awaiting Approval > In Diagnosis > Received)
 - Finalized order exclusion by default
@@ -175,6 +180,7 @@ Comprehensive architecture diagrams are available in PlantUML format (`.wsd` fil
 - Average execution time monitoring
 
 ### Security
+
 - JWT-based authentication
 - Protected administrative endpoints
 - Public endpoints for customer tracking and approval
@@ -266,6 +272,7 @@ docker-compose up -d
 ```
 
 This will:
+
 - Start PostgreSQL database on port 5432
 - Run migrations automatically
 - Start the API on port 3000 with health checks
@@ -336,17 +343,17 @@ kubectl get hpa -n fiap-mecanica
 
 ### Kubernetes Resources
 
-| Resource | Description |
-|----------|-------------|
-| Namespace | `fiap-mecanica` |
-| ConfigMap | Non-secret configuration |
-| Secret | JWT secret, DB credentials |
-| PVC | 1Gi PostgreSQL storage |
-| PostgreSQL Deployment | 1 replica with liveness/readiness probes |
-| App Deployment | 2 replicas with init container for migrations |
-| PostgreSQL Service | ClusterIP on port 5432 |
-| App Service | NodePort on port 30000 |
-| HPA | Auto-scale 2-5 replicas (CPU 70%, Memory 80%) |
+| Resource              | Description                                   |
+| --------------------- | --------------------------------------------- |
+| Namespace             | `fiap-mecanica`                               |
+| ConfigMap             | Non-secret configuration                      |
+| Secret                | JWT secret, DB credentials                    |
+| PVC                   | 1Gi PostgreSQL storage                        |
+| PostgreSQL Deployment | 1 replica with liveness/readiness probes      |
+| App Deployment        | 2 replicas with init container for migrations |
+| PostgreSQL Service    | ClusterIP on port 5432                        |
+| App Service           | NodePort on port 30000                        |
+| HPA                   | Auto-scale 2-5 replicas (CPU 70%, Memory 80%) |
 
 ## Terraform Provisioning
 
@@ -404,11 +411,11 @@ The project uses GitHub Actions with three stages:
 
 ### Trigger Conditions
 
-| Event | Test | Build | Deploy |
-|-------|------|-------|--------|
-| Push to `main` | Yes | Yes | Yes |
-| Push to `develop` | Yes | No | No |
-| PR to `main` | Yes | No | No |
+| Event             | Test | Build | Deploy |
+| ----------------- | ---- | ----- | ------ |
+| Push to `main`    | Yes  | Yes   | Yes    |
+| Push to `develop` | Yes  | No    | No     |
+| PR to `main`      | Yes  | No    | No     |
 
 ## API Documentation
 
@@ -419,9 +426,11 @@ Access Swagger UI at: http://localhost:3000/api/docs
 ### Main Endpoints
 
 #### Health
+
 - `GET /api/v1/health` - Health check (public)
 
 #### Customers
+
 - `POST /api/v1/customers` - Create customer
 - `GET /api/v1/customers` - List customers
 - `GET /api/v1/customers/:id` - Get customer by ID
@@ -429,6 +438,7 @@ Access Swagger UI at: http://localhost:3000/api/docs
 - `DELETE /api/v1/customers/:id` - Delete customer
 
 #### Service Orders
+
 - `POST /api/v1/service-orders` - Create service order
 - `GET /api/v1/service-orders` - List service orders (priority-sorted, excludes finalized)
 - `GET /api/v1/service-orders/:id` - Get service order (public)
@@ -465,6 +475,7 @@ npm run test:e2e
 ### Coverage Requirements
 
 The project aims for **80% minimum coverage** on critical domains:
+
 - Domain entities
 - Value objects
 - Use cases
@@ -557,6 +568,7 @@ Customer (1) ──── (*) Vehicle
 ### Environment Variables
 
 Never commit sensitive data:
+
 - Keep `.env` file out of version control
 - Use strong JWT secrets in production
 - Rotate secrets regularly
@@ -577,6 +589,7 @@ Never commit sensitive data:
 ### Code Style
 
 The project uses:
+
 - **ESLint** for linting
 - **Prettier** for formatting
 
