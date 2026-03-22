@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/your-username/fiap-mecanica:latest
+          image: fiap-mecanica:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           envFrom:
@@ -48,7 +49,8 @@ spec:
             failureThreshold: 3
       initContainers:
         - name: db-migrate
-          image: ghcr.io/your-username/fiap-mecanica:latest
+          image: fiap-mecanica:latest
+          imagePullPolicy: Never
           command: ["npx", "prisma", "migrate", "deploy"]
           envFrom:
             - secretRef:

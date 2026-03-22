@@ -317,7 +317,7 @@ kind load docker-image fiap-mecanica:latest --name fiap-mecanica-cluster
 4. **Apply Kubernetes manifests**
 
 ```bash
-kubectl apply -f k8s/
+kubectl apply -k k8s/
 ```
 
 5. **Verify deployment**
