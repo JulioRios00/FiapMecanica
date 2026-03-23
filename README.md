@@ -308,9 +308,12 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
   extraPortMappings:
-  - containerPort: 30000
-    hostPort: 30000
-    protocol: TCP
+    - containerPort: 80
+      hostPort: 80
+      protocol: TCP
+    - containerPort: 443
+      hostPort: 443
+      protocol: TCP
 - role: worker
 EOF
 ```
@@ -323,8 +326,19 @@ kind load docker-image fiap-mecanica:latest --name fiap-mecanica-cluster
 
 4. **Apply Kubernetes manifests**
 
+- **Install ingress controller**
 ```bash
-kubectl apply -f k8s/
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+```
+
+- **Install metrics service**
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+- **Apply all**
+```bash
+kubectl apply -k k8s/
 ```
 
 5. **Verify deployment**
@@ -336,6 +350,11 @@ kubectl get hpa -n fiap-mecanica
 ```
 
 6. **Access the application**
+
+- **For win / WSL port mapping**
+```bash
+kubectl port-forward -n fiap-mecanica svc/fiap-mecanica-service 3000:80 --address 0.0.0.0
+```
 
 - **API**: http://localhost:30000/api/v1
 - **Swagger**: http://localhost:30000/api/docs

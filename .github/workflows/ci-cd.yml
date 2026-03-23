@@ -136,7 +136,7 @@ jobs:
           kind load docker-image fiap-mecanica:latest --name fiap-mecanica-cluster
 
       - name: Apply Kubernetes manifests
-        run: kubectl apply -f k8s/
+        run: kubectl apply -k k8s/
 
       - name: Wait for PostgreSQL rollout
         run: kubectl rollout status deployment/postgres -n fiap-mecanica --timeout=120s

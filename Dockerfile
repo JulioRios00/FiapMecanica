@@ -1,5 +1,5 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage w/ openssl
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
@@ -21,8 +21,8 @@ RUN npx prisma generate
 # Build application
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine AS production
+# Production stage w/ openssl
+FROM node:20-bullseye AS production
 
 WORKDIR /app
 
@@ -46,4 +46,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 
 # Start application
 CMD ["node", "dist/main"]
-
