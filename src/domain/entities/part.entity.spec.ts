@@ -5,7 +5,7 @@ describe('Part Entity', () => {
     name: 'Engine Oil Filter',
     partNumber: 'EOF-12345',
     manufacturer: 'Bosch',
-    price: 45.50,
+    price: 45.5,
     stockQuantity: 100,
     minStockLevel: 10,
   };
@@ -16,7 +16,7 @@ describe('Part Entity', () => {
       expect(part).toBeDefined();
       expect(part.getName()).toBe('Engine Oil Filter');
       expect(part.getPartNumber()).toBe('EOF-12345');
-      expect(part.getPrice()).toBe(45.50);
+      expect(part.getPrice()).toBe(45.5);
       expect(part.getStockQuantity()).toBe(100);
       expect(part.isActive()).toBe(true);
     });
@@ -45,45 +45,63 @@ describe('Part Entity', () => {
 
   describe('Validation', () => {
     it('should reject name with less than 2 characters', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        name: 'A',
-      })).toThrow('Part name must have at least 2 characters');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            name: 'A',
+          }),
+      ).toThrow('Part name must have at least 2 characters');
     });
 
     it('should reject empty name', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        name: '',
-      })).toThrow('Part name must have at least 2 characters');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            name: '',
+          }),
+      ).toThrow('Part name must have at least 2 characters');
     });
 
     it('should reject partNumber with less than 2 characters', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        partNumber: 'A',
-      })).toThrow('Part number must have at least 2 characters');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            partNumber: 'A',
+          }),
+      ).toThrow('Part number must have at least 2 characters');
     });
 
     it('should reject negative price', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        price: -10,
-      })).toThrow('Price cannot be negative');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            price: -10,
+          }),
+      ).toThrow('Price cannot be negative');
     });
 
     it('should reject negative stock quantity', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        stockQuantity: -5,
-      })).toThrow('Stock quantity cannot be negative');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            stockQuantity: -5,
+          }),
+      ).toThrow('Stock quantity cannot be negative');
     });
 
     it('should reject negative min stock level', () => {
-      expect(() => new Part({
-        ...validPartProps,
-        minStockLevel: -1,
-      })).toThrow('Minimum stock level cannot be negative');
+      expect(
+        () =>
+          new Part({
+            ...validPartProps,
+            minStockLevel: -1,
+          }),
+      ).toThrow('Minimum stock level cannot be negative');
     });
 
     it('should accept price of zero', () => {
@@ -100,20 +118,22 @@ describe('Part Entity', () => {
       const part = new Part(validPartProps);
       part.updateInfo({
         name: 'Premium Oil Filter',
-        price: 55.00,
+        price: 55.0,
         manufacturer: 'Mann-Filter',
       });
 
       expect(part.getName()).toBe('Premium Oil Filter');
-      expect(part.getPrice()).toBe(55.00);
+      expect(part.getPrice()).toBe(55.0);
       expect(part.getManufacturer()).toBe('Mann-Filter');
     });
 
     it('should validate updated information', () => {
       const part = new Part(validPartProps);
-      expect(() => part.updateInfo({
-        name: 'A',
-      })).toThrow('Part name must have at least 2 characters');
+      expect(() =>
+        part.updateInfo({
+          name: 'A',
+        }),
+      ).toThrow('Part name must have at least 2 characters');
     });
 
     it('should update only provided fields', () => {
@@ -256,7 +276,7 @@ describe('Part Entity', () => {
       expect(json).toHaveProperty('name', 'Engine Oil Filter');
       expect(json).toHaveProperty('partNumber', 'EOF-12345');
       expect(json).toHaveProperty('manufacturer', 'Bosch');
-      expect(json).toHaveProperty('price', 45.50);
+      expect(json).toHaveProperty('price', 45.5);
       expect(json).toHaveProperty('stockQuantity', 100);
       expect(json).toHaveProperty('minStockLevel', 10);
       expect(json).toHaveProperty('active', true);

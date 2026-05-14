@@ -71,6 +71,7 @@ export class Part {
     if (data.description !== undefined) this.description = data.description;
     if (data.manufacturer !== undefined) this.manufacturer = data.manufacturer;
     if (data.price !== undefined) this.price = data.price;
+    if (data.stockQuantity !== undefined) this.stockQuantity = data.stockQuantity;
     if (data.minStockLevel !== undefined) this.minStockLevel = data.minStockLevel;
     if (data.unit !== undefined) this.unit = data.unit;
     this.updatedAt = new Date();
@@ -191,4 +192,3 @@ export class Part {
     };
   }
 }
-

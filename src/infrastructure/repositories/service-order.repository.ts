@@ -153,6 +153,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     customerId?: string;
     page?: number;
     limit?: number;
+    excludeCompleted?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;
@@ -162,9 +163,20 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
     const page = params?.page || 1;
     const limit = params?.limit || 10;
     const skip = (page - 1) * limit;
+    const excludeCompleted = params?.excludeCompleted ?? true;
 
     const where: any = {};
-    if (params?.status) where.status = params.status;
+    if (params?.status) {
+      where.status = params.status;
+    } else if (excludeCompleted) {
+      where.status = {
+        notIn: [
+          ServiceOrderStatus.COMPLETED,
+          ServiceOrderStatus.DELIVERED,
+          ServiceOrderStatus.CANCELLED,
+        ],
+      };
+    }
     if (params?.customerId) where.customerId = params.customerId;
 
     const [serviceOrders, total] = await Promise.all([
@@ -366,6 +378,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
   }
 
   private mapToServiceOrder(data: any): ServiceOrder {
+    // Convert Prisma Decimal to number - ServiceOrder constructor will convert to Money VO
     return new ServiceOrder({
       id: data.id,
       orderNumber: data.orderNumber,
@@ -378,7 +391,7 @@ export class ServiceOrderRepository implements ServiceOrderRepositoryPort {
       observations: data.observations || undefined,
       estimatedCompletion: data.estimatedCompletion || undefined,
       actualCompletion: data.actualCompletion || undefined,
-      totalAmount: Number(data.totalAmount),
+      totalAmount: Number(data.totalAmount), // Converted to Money VO by constructor
       approvedAmount: data.approvedAmount ? Number(data.approvedAmount) : undefined,
       approvedAt: data.approvedAt || undefined,
       approvedBy: data.approvedBy || undefined,

@@ -1,6 +1,7 @@
 import { ServiceOrderStatus, Priority } from '@prisma/client';
 
 import { ServiceOrder, ServiceOrderProps } from './service-order.entity';
+import { InvalidStatusTransitionException } from '@shared/exceptions/invalid-status-transition.exception';
 
 describe('ServiceOrder Entity', () => {
   jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
@@ -50,7 +51,7 @@ describe('ServiceOrder Entity', () => {
 
     it('should reject service order with wrong price', () => {
       const invalidProps = { ...validServiceOrderProps, totalAmount: -20 };
-      expect(() => new ServiceOrder(invalidProps)).toThrow('Total amount cannot be negative');
+      expect(() => new ServiceOrder(invalidProps)).toThrow('Money amount cannot be negative');
     });
   });
 
@@ -66,7 +67,7 @@ describe('ServiceOrder Entity', () => {
       const serviceOrder = new ServiceOrder(validServiceOrderProps);
 
       expect(() => serviceOrder.updateStatus(ServiceOrderStatus.COMPLETED)).toThrow(
-        'Invalid status transition',
+        InvalidStatusTransitionException,
       );
     });
 
@@ -114,7 +115,7 @@ describe('ServiceOrder Entity', () => {
 
       serviceOrder.approve('customer@example.com', 450);
 
-      expect(serviceOrder.getApprovedAmount()).toBe(450);
+      expect(serviceOrder.getApprovedAmount()?.toNumber()).toBe(450);
     });
   });
 
@@ -129,7 +130,7 @@ describe('ServiceOrder Entity', () => {
     it('should reject negative total amount', () => {
       const serviceOrder = new ServiceOrder(validServiceOrderProps);
 
-      expect(() => serviceOrder.updateTotalAmount(-100)).toThrow('Total amount cannot be negative');
+      expect(() => serviceOrder.updateTotalAmount(-100)).toThrow('Money amount cannot be negative');
     });
   });
 
@@ -138,13 +139,13 @@ describe('ServiceOrder Entity', () => {
       const serviceOrder = new ServiceOrder(validServiceOrderProps);
 
       serviceOrder.updateTotalAmount(1000);
-      expect(serviceOrder.getTotalAmount()).toBe(1000);
+      expect(serviceOrder.getTotalAmount().toNumber()).toBe(1000);
     });
 
     it('should reject negative total amount', () => {
       const serviceOrder = new ServiceOrder(validServiceOrderProps);
 
-      expect(() => serviceOrder.updateTotalAmount(-100)).toThrow('Total amount cannot be negative');
+      expect(() => serviceOrder.updateTotalAmount(-100)).toThrow('Money amount cannot be negative');
     });
   });
 

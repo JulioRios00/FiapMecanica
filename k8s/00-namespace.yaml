@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fiap-mecanica
+  labels:
+    app: fiap-mecanica
+    environment: production

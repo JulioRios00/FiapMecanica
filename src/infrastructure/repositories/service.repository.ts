@@ -75,11 +75,7 @@ export class ServiceRepository implements ServiceRepositoryPort {
     );
   }
 
-  async findAll(params?: {
-    active?: boolean;
-    page?: number;
-    limit?: number;
-  }): Promise<{
+  async findAll(params?: { active?: boolean; page?: number; limit?: number }): Promise<{
     data: Service[];
     total: number;
     page: number;
@@ -155,4 +151,3 @@ export class ServiceRepository implements ServiceRepositoryPort {
     });
   }
 }
-

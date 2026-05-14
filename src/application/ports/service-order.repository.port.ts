@@ -34,6 +34,7 @@ export abstract class ServiceOrderRepositoryPort {
     customerId?: string;
     page?: number;
     limit?: number;
+    excludeCompleted?: boolean;
   }): Promise<{
     data: ServiceOrderWithDetails[];
     total: number;
@@ -41,7 +42,11 @@ export abstract class ServiceOrderRepositoryPort {
     limit: number;
   }>;
   abstract update(id: string, serviceOrder: ServiceOrder): Promise<ServiceOrder>;
-  abstract updateStatus(id: string, status: ServiceOrderStatus, reason?: string): Promise<ServiceOrder>;
+  abstract updateStatus(
+    id: string,
+    status: ServiceOrderStatus,
+    reason?: string,
+  ): Promise<ServiceOrder>;
   abstract addServiceItem(serviceOrderId: string, item: ServiceOrderItem): Promise<void>;
   abstract addPartItem(serviceOrderId: string, item: PartOrderItem): Promise<void>;
   abstract getAverageExecutionTime(): Promise<number>;
@@ -53,4 +58,3 @@ export abstract class ServiceOrderRepositoryPort {
   }>;
   abstract delete(id: string): Promise<void>;
 }
-

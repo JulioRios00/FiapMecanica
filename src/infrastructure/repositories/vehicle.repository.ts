@@ -104,11 +104,7 @@ export class VehicleRepository implements VehicleRepositoryPort {
     );
   }
 
-  async findAll(params?: {
-    active?: boolean;
-    page?: number;
-    limit?: number;
-  }): Promise<{
+  async findAll(params?: { active?: boolean; page?: number; limit?: number }): Promise<{
     data: Vehicle[];
     total: number;
     page: number;
@@ -188,4 +184,3 @@ export class VehicleRepository implements VehicleRepositoryPort {
     });
   }
 }
-

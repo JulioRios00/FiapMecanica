@@ -8,7 +8,7 @@ export class GetCustomerUseCase {
 
   async execute(id: string): Promise<Customer> {
     const customer = await this.customerRepository.findById(id);
-    
+
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
@@ -16,4 +16,3 @@ export class GetCustomerUseCase {
     return customer;
   }
 }
-

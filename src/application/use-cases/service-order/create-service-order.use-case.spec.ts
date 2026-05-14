@@ -6,10 +6,13 @@ import { ServiceOrderRepositoryPort } from '@application/ports/service-order.rep
 import { Service } from '@domain/entities/service.entity';
 import { PartRepositoryPort } from '@application/ports/part.repository.port';
 import { Part } from '@domain/entities/part.entity';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { DocumentType, ServiceCategory } from '@prisma/client';
 import { CustomerRepositoryPort } from '@application/ports/customer.repository.port';
 import { Customer } from '@domain/entities/customer.entity';
+import { ServiceInactiveException } from '@shared/exceptions/service-inactive.exception';
+import { InsufficientStockException } from '@shared/exceptions/insufficient-stock.exception';
+import { VehicleOwnershipException } from '@shared/exceptions/vehicle-ownership.exception';
 
 import { CreateServiceOrderUseCase } from './create-service-order.use-case';
 
@@ -195,9 +198,7 @@ describe('CreateServiceOrderUseCase', () => {
     mockCustomerRepository.findById.mockResolvedValue(customer);
     mockVehicleRepository.findById.mockResolvedValue(vehicle);
 
-    await expect(useCase.execute(input)).rejects.toThrow(
-      new BadRequestException('Vehicle does not belong to this customer'),
-    );
+    await expect(useCase.execute(input)).rejects.toThrow(VehicleOwnershipException);
   });
 
   it('should throw NotFoundException if service does not exist', async () => {
@@ -222,9 +223,7 @@ describe('CreateServiceOrderUseCase', () => {
     mockVehicleRepository.findById.mockResolvedValue(vehicle);
     mockServiceRepository.findById.mockResolvedValue(service);
 
-    await expect(useCase.execute(input)).rejects.toThrow(
-      new BadRequestException('Service Oil Change is not active'),
-    );
+    await expect(useCase.execute(input)).rejects.toThrow(ServiceInactiveException);
   });
 
   it('should throw NotFoundException if part does not exist', async () => {
@@ -249,9 +248,7 @@ describe('CreateServiceOrderUseCase', () => {
     mockVehicleRepository.findById.mockResolvedValue(vehicle);
     mockPartRepository.findById.mockResolvedValue(part);
 
-    await expect(useCase.execute(input)).rejects.toThrow(
-      new BadRequestException('Part Brake Pad is not active'),
-    );
+    await expect(useCase.execute(input)).rejects.toThrow(ServiceInactiveException);
   });
 
   it('should throw BadRequestException if insufficient stock', async () => {
@@ -263,8 +260,6 @@ describe('CreateServiceOrderUseCase', () => {
     mockVehicleRepository.findById.mockResolvedValue(vehicle);
     mockPartRepository.findById.mockResolvedValue(part);
 
-    await expect(useCase.execute(input)).rejects.toThrow(
-      new BadRequestException('Insufficient stock for part Brake Pad. Available: 5'),
-    );
+    await expect(useCase.execute(input)).rejects.toThrow(InsufficientStockException);
   });
 });

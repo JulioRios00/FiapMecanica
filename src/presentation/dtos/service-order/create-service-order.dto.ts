@@ -84,4 +84,3 @@ export class CreateServiceOrderDto {
   @Type(() => PartItemDto)
   parts?: PartItemDto[];
 }
-

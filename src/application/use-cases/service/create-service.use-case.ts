@@ -11,4 +11,3 @@ export class CreateServiceUseCase {
     return await this.serviceRepository.create(service);
   }
 }
-

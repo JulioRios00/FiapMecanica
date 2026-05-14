@@ -11,13 +11,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ParseUUIDPipe } from '@shared/pipes/parse-uuid.pipe';
 import { CreateCustomerDto } from '../dtos/customer/create-customer.dto';
@@ -104,4 +98,3 @@ export class CustomerController {
     await this.deleteCustomerUseCase.execute(id);
   }
 }
-

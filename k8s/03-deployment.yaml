@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-mecanica-api
+  namespace: fiap-mecanica
+  labels:
+    app: fiap-mecanica-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fiap-mecanica-api
+  template:
+    metadata:
+      labels:
+        app: fiap-mecanica-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/your-username/fiap-mecanica:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: fiap-mecanica-config
+            - secretRef:
+                name: fiap-mecanica-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+      initContainers:
+        - name: db-migrate
+          image: ghcr.io/your-username/fiap-mecanica:latest
+          command: ["npx", "prisma", "migrate", "deploy"]
+          envFrom:
+            - secretRef:
+                name: fiap-mecanica-secrets

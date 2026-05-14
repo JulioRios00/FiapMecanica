@@ -7,7 +7,7 @@ export class DeleteCustomerUseCase {
 
   async execute(id: string): Promise<void> {
     const customer = await this.customerRepository.findById(id);
-    
+
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
@@ -16,4 +16,3 @@ export class DeleteCustomerUseCase {
     await this.customerRepository.update(id, customer);
   }
 }
-
