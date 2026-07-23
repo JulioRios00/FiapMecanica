@@ -1,0 +1,27 @@
+# compiled output
+dist/
+node_modules/
+build/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Tests
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/migrations/*/migration.sql
+
+# Sonar
+.scannerwork/
