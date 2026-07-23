@@ -1,0 +1,19 @@
+# Local SonarQube server for running code quality analysis against os-service.
+# Usage: docker compose -f docker-compose.sonar.yml up -d
+# Dashboard: http://localhost:9000 (default login admin/admin, must be changed on first access)
+services:
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - '9000:9000'
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: 'true'
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
