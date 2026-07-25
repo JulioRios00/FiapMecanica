@@ -16,11 +16,15 @@ services:
     environment:
       PORT: 3020
       DATABASE_URL: postgresql://saga_user:saga_pass@saga-orchestrator-db:5432/saga_orchestrator?schema=public
-      # os-service is a sibling service; reach it via the host when each
-      # microservice is run from its own docker-compose file.
+      # Sibling services; reach them via the host when each microservice runs
+      # from its own docker-compose file.
       OS_SERVICE_URL: http://host.docker.internal:3010/api/v1
-      # Billing/Execution services are owned by other teams and aren't part
-      # of this repo yet, so downstream calls default to in-process mocks.
+      BILLING_SERVICE_URL: http://host.docker.internal:3001/api/v1
+      RABBITMQ_URL: amqp://guest:guest@host.docker.internal:5672
+      EXECUTION_SAGA_EXCHANGE: workshop.saga
+      # Billing/Execution are owned by other teams; flip to 'false' once
+      # they're running alongside this service to use the real adapters
+      # above instead of the in-process mocks.
       USE_MOCK_DOWNSTREAM: 'true'
     depends_on:
       - saga-orchestrator-db
