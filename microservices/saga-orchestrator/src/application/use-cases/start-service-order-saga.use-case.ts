@@ -44,6 +44,7 @@ export class StartServiceOrderSagaUseCase {
       updatedAt: now,
     });
     saga = await this.sagaRepository.create(saga);
+    this.logger.log(`Saga ${saga.getId()} started (correlationId=${correlationId})`);
 
     try {
       const { id: osId } = await this.osService.openServiceOrder({
@@ -53,6 +54,7 @@ export class StartServiceOrderSagaUseCase {
       saga.setOsId(osId);
       saga.markStepCompleted('OPEN_OS');
       saga = await this.sagaRepository.save(saga);
+      this.logger.log(`Saga ${saga.getId()} step OPEN_OS complete (osId=${osId}, correlationId=${correlationId})`);
 
       const { budgetId } = await this.billingService.requestQuote({
         osId,
@@ -63,23 +65,30 @@ export class StartServiceOrderSagaUseCase {
       saga.markStepCompleted('REQUEST_QUOTE');
       saga.setAwaitingApproval();
       saga = await this.sagaRepository.save(saga);
+      this.logger.log(
+        `Saga ${saga.getId()} step REQUEST_QUOTE complete (budgetId=${budgetId}, correlationId=${correlationId})`,
+      );
 
       await this.billingService.confirmPayment({ budgetId, correlationId });
       saga.markStepCompleted('CONFIRM_PAYMENT');
       saga.setPaymentConfirmed();
       saga = await this.sagaRepository.save(saga);
+      this.logger.log(`Saga ${saga.getId()} step CONFIRM_PAYMENT complete (correlationId=${correlationId})`);
 
       await this.executionService.startExecution({ osId, correlationId });
       saga.markStepCompleted('START_EXECUTION');
       saga.setExecutionStarted();
       saga = await this.sagaRepository.save(saga);
+      this.logger.log(`Saga ${saga.getId()} step START_EXECUTION complete (correlationId=${correlationId})`);
 
       await this.osService.updateStatus({ id: osId, status: 'COMPLETED', correlationId });
       saga.complete();
-      return await this.sagaRepository.save(saga);
+      saga = await this.sagaRepository.save(saga);
+      this.logger.log(`Saga ${saga.getId()} COMPLETED (osId=${osId}, correlationId=${correlationId})`);
+      return saga;
     } catch (error) {
       const reason = errorMessage(error);
-      this.logger.error(`Saga ${saga.getId()} failed: ${reason}`);
+      this.logger.error(`Saga ${saga.getId()} failed (correlationId=${correlationId}): ${reason}`);
 
       if (saga.getOsId()) {
         saga.startCompensating(reason);
@@ -91,7 +100,11 @@ export class StartServiceOrderSagaUseCase {
         saga.fail(reason);
       }
 
-      return await this.sagaRepository.save(saga);
+      saga = await this.sagaRepository.save(saga);
+      this.logger.log(
+        `Saga ${saga.getId()} ended with status ${saga.getStatus()} (correlationId=${correlationId})`,
+      );
+      return saga;
     }
   }
 }

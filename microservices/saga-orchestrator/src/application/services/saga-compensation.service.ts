@@ -27,35 +27,49 @@ export class SagaCompensationService {
       return;
     }
 
+    this.logger.log(
+      `Saga ${saga.getId()} compensation started (reason=${reason}, correlationId=${correlationId})`,
+    );
+
     const budgetId = saga.getBudgetId();
     const steps = new Set(saga.getCompletedSteps());
 
     if (steps.has('START_EXECUTION')) {
-      await this.run(saga, 'cancelExecution', () =>
+      await this.run(saga, 'cancelExecution', correlationId, () =>
         this.executionService.cancelExecution({ osId, reason, correlationId }),
       );
     }
 
     if (budgetId && steps.has('CONFIRM_PAYMENT')) {
-      await this.run(saga, 'notifyExecutionFailure', () =>
+      await this.run(saga, 'notifyExecutionFailure', correlationId, () =>
         this.billingService.notifyExecutionFailure({ budgetId, reason, correlationId }),
       );
     } else if (budgetId && steps.has('REQUEST_QUOTE')) {
-      await this.run(saga, 'cancelQuote', () =>
+      await this.run(saga, 'cancelQuote', correlationId, () =>
         this.billingService.cancelQuote({ budgetId, reason, correlationId }),
       );
     }
 
-    await this.run(saga, 'cancelServiceOrder', () =>
+    await this.run(saga, 'cancelServiceOrder', correlationId, () =>
       this.osService.cancelServiceOrder({ id: osId, reason, correlationId }),
     );
+
+    this.logger.log(`Saga ${saga.getId()} compensation finished (correlationId=${correlationId})`);
   }
 
-  private async run(saga: SagaInstance, label: string, action: () => Promise<void>): Promise<void> {
+  private async run(
+    saga: SagaInstance,
+    label: string,
+    correlationId: string,
+    action: () => Promise<void>,
+  ): Promise<void> {
     try {
       await action();
+      this.logger.log(`Compensation step "${label}" done for saga ${saga.getId()} (correlationId=${correlationId})`);
     } catch (error) {
-      this.logger.error(`Compensation step "${label}" failed for saga ${saga.getId()}: ${errorMessage(error)}`);
+      this.logger.error(
+        `Compensation step "${label}" failed for saga ${saga.getId()} (correlationId=${correlationId}): ${errorMessage(error)}`,
+      );
     }
   }
 }
