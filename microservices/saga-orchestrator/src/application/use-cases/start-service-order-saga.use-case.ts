@@ -65,6 +65,7 @@ export class StartServiceOrderSagaUseCase {
       saga.markStepCompleted('REQUEST_QUOTE');
       saga.setAwaitingApproval();
       saga = await this.sagaRepository.save(saga);
+      await this.osService.updateStatus({ id: osId, status: 'AWAITING_QUOTE', correlationId });
       this.logger.log(
         `Saga ${saga.getId()} step REQUEST_QUOTE complete (budgetId=${budgetId}, correlationId=${correlationId})`,
       );
@@ -73,12 +74,14 @@ export class StartServiceOrderSagaUseCase {
       saga.markStepCompleted('CONFIRM_PAYMENT');
       saga.setPaymentConfirmed();
       saga = await this.sagaRepository.save(saga);
+      await this.osService.updateStatus({ id: osId, status: 'QUOTE_APPROVED', correlationId });
       this.logger.log(`Saga ${saga.getId()} step CONFIRM_PAYMENT complete (correlationId=${correlationId})`);
 
       await this.executionService.startExecution({ osId, correlationId });
       saga.markStepCompleted('START_EXECUTION');
       saga.setExecutionStarted();
       saga = await this.sagaRepository.save(saga);
+      await this.osService.updateStatus({ id: osId, status: 'IN_EXECUTION', correlationId });
       this.logger.log(`Saga ${saga.getId()} step START_EXECUTION complete (correlationId=${correlationId})`);
 
       await this.osService.updateStatus({ id: osId, status: 'COMPLETED', correlationId });

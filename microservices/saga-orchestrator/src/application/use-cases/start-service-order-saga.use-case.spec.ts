@@ -61,6 +61,15 @@ describe('StartServiceOrderSagaUseCase', () => {
     });
     expect(billingService.confirmPayment).toHaveBeenCalledWith({ budgetId: 'budget-1', correlationId: 'corr-1' });
     expect(executionService.startExecution).toHaveBeenCalledWith({ osId: 'os-1', correlationId: 'corr-1' });
+    // The OS is advanced through every real os-service status as the saga
+    // progresses -- jumping straight to COMPLETED would violate its state
+    // machine (OPEN -> AWAITING_QUOTE -> QUOTE_APPROVED -> IN_EXECUTION -> COMPLETED).
+    expect(osService.updateStatus.mock.calls.map((call) => call[0].status)).toEqual([
+      'AWAITING_QUOTE',
+      'QUOTE_APPROVED',
+      'IN_EXECUTION',
+      'COMPLETED',
+    ]);
     expect(osService.updateStatus).toHaveBeenCalledWith({
       id: 'os-1',
       status: 'COMPLETED',
