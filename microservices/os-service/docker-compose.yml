@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  os-service-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: os_service
+      POSTGRES_USER: os_user
+      POSTGRES_PASSWORD: os_pass
+    ports:
+      - '5435:5432'
+
+  os-service:
+    build: .
+    restart: on-failure
+    environment:
+      PORT: 3010
+      DATABASE_URL: postgresql://os_user:os_pass@os-service-db:5432/os_service?schema=public
+    depends_on:
+      - os-service-db
+    ports:
+      - '3010:3010'
+
