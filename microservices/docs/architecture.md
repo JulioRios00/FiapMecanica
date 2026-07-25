@@ -1,9 +1,11 @@
 # Architecture — OS Service & Saga Orchestrator
 
 Scope owned in this repo: **OS Service** (`os-service`) and the **Saga
-Orchestrator** (`saga-orchestrator`). `billing-service` and `execution-service`
-are owned by other teams; here they exist only as scaffolds/mocks so the saga
-can be exercised end-to-end.
+Orchestrator** (`saga-orchestrator`). `billing-service` and
+`execution-service-api` are owned by other teams and are now implemented in
+their own repos; `saga-orchestrator` talks to them for real when
+`USE_MOCK_DOWNSTREAM=false`, and to in-process mocks otherwise so the saga
+can still be exercised end-to-end without them running.
 
 ## Component diagram
 
@@ -23,19 +25,27 @@ flowchart LR
         OS --- OSDB
     end
 
-    subgraph "Billing Service (teammate-owned)"
-        Billing["billing-service\n(scaffold / mock)"]
+    subgraph "Billing Service (teammate-owned, :3001)"
+        Billing["billing-service\nREST: /budgets, /payments"]
     end
 
+    RabbitMQ{{"RabbitMQ\nworkshop.saga exchange"}}
+
     subgraph "Execution Service (teammate-owned)"
-        Execution["execution-service\n(scaffold / mock)"]
+        Execution["execution-service-api\nconsumes service-order.approved/cancelled"]
     end
 
     Client -->|POST /sagas| Saga
     Saga -->|open / update-status / cancel| OS
-    Saga -->|request-quote / confirm-payment /\ncancel-quote / notify-execution-failure| Billing
-    Saga -->|start / cancel execution| Execution
+    Saga -->|"POST /budgets, PUT /budgets/:id/approve,\nPOST /payments"| Billing
+    Saga -->|"publish service-order.approved /\nservice-order.cancelled"| RabbitMQ
+    RabbitMQ -->|consume| Execution
 ```
+
+**Note on the diagram:** the saga-orchestrator → Billing and saga-orchestrator
+→ Execution edges use different transports (REST vs. AMQP) because the two
+teammate services were built with different interaction styles — see
+"Integration reality vs. original design" below.
 
 ## Saga strategy: Orchestrated (not Choreographed)
 
@@ -72,18 +82,62 @@ each with a forward action and a compensating action:
 
 | Step | Forward action (port method) | Compensating action |
 |---|---|---|
-| 1. Open OS | `OsServicePort.openServiceOrder` | `OsServicePort.cancelServiceOrder` |
-| 2. Request quote | `BillingServicePort.requestQuote` | `BillingServicePort.cancelQuote` |
-| 3. Confirm payment | `BillingServicePort.confirmPayment` | `BillingServicePort.notifyExecutionFailure` (refund path — payment already succeeded) |
+| 1. Open OS | `OsServicePort.openServiceOrder` → `{id: osId}` | `OsServicePort.cancelServiceOrder` |
+| 2. Request quote | `BillingServicePort.requestQuote` → `{budgetId}` | `BillingServicePort.cancelQuote(budgetId)` |
+| 3. Confirm payment | `BillingServicePort.confirmPayment(budgetId)` | `BillingServicePort.notifyExecutionFailure(budgetId)` (refund path — payment already succeeded) |
 | 4. Start execution | `ExecutionServicePort.startExecution` | `ExecutionServicePort.cancelExecution` |
 | 5. Complete OS | `OsServicePort.updateStatus(COMPLETED)` | — (terminal step; a failure here still triggers steps 1-4's compensations) |
 
-`OsServicePort` is implemented by `HttpOsServiceClient`, which calls the real
-`os-service` HTTP API. `BillingServicePort` and `ExecutionServicePort` default
-to in-process mocks (`infra/mocks/*`) — swap to the real HTTP clients
-(`infra/clients/http-billing-service.client.ts`,
-`infra/clients/http-execution-service.client.ts`) by setting
-`USE_MOCK_DOWNSTREAM=false` once those teams' services are deployed.
+`SagaInstance` persists both `osId` and `budgetId` as they're assigned, so a
+step failing three hops later still knows what to roll back.
+
+## Integration reality vs. original design
+
+The ports above were originally speculative (billing/execution didn't exist
+yet). Now that both teams have shipped their services, two real mismatches
+came up, and in both cases **saga-orchestrator adapted to the real contract
+rather than asking the other team to change already-built, working
+services**:
+
+- **`billing-service` is REST-driven** — `POST /budgets` (needs
+  `serviceOrderId` + line items), `PUT /budgets/:id/approve`
+  (`{approved: boolean}`), `POST /payments` (needs `budgetId` +
+  `paymentMethod`). It fits the orchestrated model directly.
+  `HttpBillingServiceClient` calls these endpoints; `confirmPayment` does the
+  approve-then-pay as two calls under one port method.
+  - **Known gap:** billing-service has no pricing/catalog integration, so
+    `requestQuote` sends a single placeholder line item built from the OS
+    description (`PLACEHOLDER_UNIT_PRICE` in the client). Real pricing needs
+    that team to expose a catalog, or for us to pass real items through
+    `StartSagaDto`.
+  - **Known gap:** billing-service has no refund/execution-failure endpoint,
+    so `notifyExecutionFailure` only logs a warning today instead of calling
+    out — the payment isn't actually reversed on their side yet.
+
+- **`execution-service-api` is choreography-only** — it has no REST command
+  to start or cancel an execution. It only consumes
+  `service-order.approved` / `service-order.cancelled` off a `workshop.saga`
+  topic exchange in RabbitMQ, and reacts autonomously (enqueue into its
+  priority queue, or compensate). So `RabbitMqExecutionServiceClient`
+  publishes those two events instead of making an HTTP call. The saga is
+  still **orchestrated** — this orchestrator alone decides *when* to publish
+  the trigger — it just uses AMQP as the transport for this one participant
+  because that's the contract that already exists.
+  - **Known gap:** `billing-service` publishes its own approval event
+    (`budget.approved`) to a *different* exchange (`billing`) with a
+    different name than what `execution-service-api` listens for. If
+    anything other than `saga-orchestrator` were expected to trigger
+    execution by listening to billing's events, it wouldn't work — another
+    reason the orchestrator publishing the `workshop.saga` event directly,
+    rather than relying on billing's event, is the safer choice here.
+
+`OsServicePort` is implemented by `HttpOsServiceClient`, calling the real
+`os-service` HTTP API. All three real adapters
+(`infra/clients/http-os-service.client.ts`,
+`infra/clients/http-billing-service.client.ts`,
+`infra/clients/rabbitmq-execution-service.client.ts`) are used when
+`USE_MOCK_DOWNSTREAM=false`; billing/execution default to in-process mocks
+(`infra/mocks/*`) otherwise.
 
 ## Compensation logic
 
@@ -109,18 +163,21 @@ sequenceDiagram
     participant S as saga-orchestrator
     participant OS as os-service
     participant B as billing-service
-    participant E as execution-service
+    participant Q as RabbitMQ (workshop.saga)
+    participant E as execution-service-api
 
     C->>S: POST /sagas {description}
-    S->>OS: openServiceOrder
+    S->>OS: POST /service-orders
     OS-->>S: {id: osId}
-    S->>B: requestQuote(osId)
+    S->>B: POST /budgets {serviceOrderId, items}
+    B-->>S: {id: budgetId}
+    S->>B: PUT /budgets/:id/approve {approved:true}
+    S->>B: POST /payments {budgetId}
     B-->>S: ok
-    S->>B: confirmPayment(osId)
-    B-->>S: ok
-    S->>E: startExecution(osId)
-    E-->>S: ok
-    S->>OS: updateStatus(osId, COMPLETED)
+    S->>Q: publish service-order.approved {serviceOrderId}
+    Q-->>E: consume
+    E-->>E: enqueue for a mechanic
+    S->>OS: PATCH /service-orders/:id/status COMPLETED
     OS-->>S: ok
     S-->>C: saga COMPLETED
 ```
@@ -133,32 +190,31 @@ sequenceDiagram
     participant S as saga-orchestrator
     participant OS as os-service
     participant B as billing-service
-    participant E as execution-service
+    participant Q as RabbitMQ (workshop.saga)
 
     C->>S: POST /sagas {description, correlationId: "fail:START_EXECUTION"}
-    S->>OS: openServiceOrder
+    S->>OS: POST /service-orders
     OS-->>S: {id: osId}
-    S->>B: requestQuote(osId)
+    S->>B: POST /budgets
+    B-->>S: {id: budgetId}
+    S->>B: PUT approve + POST /payments
     B-->>S: ok
-    S->>B: confirmPayment(osId)
-    B-->>S: ok
-    S->>E: startExecution(osId)
-    E-->>S: error
+    S->>Q: publish service-order.approved
+    Q-->>S: (mock) simulated failure
     Note over S: status -> COMPENSATING
-    S->>B: notifyExecutionFailure(osId)
-    S->>OS: cancelServiceOrder(osId)
+    S->>B: notifyExecutionFailure(budgetId) [logs a warning today -- no refund endpoint yet]
+    S->>OS: POST /service-orders/:id/cancel
     Note over S: status -> COMPENSATED
     S-->>C: saga COMPENSATED
 ```
 
 ## Trying it locally
 
-```bash
-# terminal 1
-cd microservices/os-service && npm run start:dev
+**With mocks (default, no other services needed):**
 
-# terminal 2
-cd microservices/saga-orchestrator && npm run start:dev
+```bash
+cd microservices/os-service && npm run start:dev            # terminal 1
+cd microservices/saga-orchestrator && npm run start:dev     # terminal 2
 
 # happy path
 curl -X POST http://localhost:3020/api/v1/sagas \
@@ -170,3 +226,10 @@ curl -X POST http://localhost:3020/api/v1/sagas \
   -H 'content-type: application/json' \
   -d '{"description":"Replace brake pads","correlationId":"fail:START_EXECUTION"}'
 ```
+
+**With the real billing-service and execution-service-api:** start those two
+alongside `os-service`, then run `saga-orchestrator` with
+`USE_MOCK_DOWNSTREAM=false` (and `BILLING_SERVICE_URL` / `RABBITMQ_URL` /
+`EXECUTION_SAGA_EXCHANGE` pointed at wherever they're running — the
+`docker-compose.yml` defaults assume all of them are reachable via
+`host.docker.internal`).

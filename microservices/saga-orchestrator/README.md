@@ -23,13 +23,20 @@ diagrams for both the happy path and the compensation path.
 
 - `os-service`: real HTTP client (`HttpOsServiceClient`), since it's
   implemented in this repo.
-- `billing-service` / `execution-service`: owned by other teams. By default
-  (`USE_MOCK_DOWNSTREAM=true`) the orchestrator talks to in-process mocks
-  (`infra/mocks/*`) so the full saga — including compensation — can be run
-  and demoed without those services existing yet. HTTP clients matching the
-  same ports (`infra/clients/http-billing-service.client.ts`,
-  `infra/clients/http-execution-service.client.ts`) are ready to swap in via
-  `USE_MOCK_DOWNSTREAM=false` once those services are deployed.
+- `billing-service` / `execution-service-api`: owned by other teams, now
+  implemented in their own repos. By default (`USE_MOCK_DOWNSTREAM=true`) the
+  orchestrator talks to in-process mocks (`infra/mocks/*`) so the full saga —
+  including compensation — can be run and demoed without those services
+  running. Set `USE_MOCK_DOWNSTREAM=false` to use the real adapters instead:
+  - `infra/clients/http-billing-service.client.ts` calls billing-service's
+    actual REST API (`POST /budgets`, `PUT /budgets/:id/approve`,
+    `POST /payments`).
+  - `infra/clients/rabbitmq-execution-service.client.ts` publishes to
+    execution-service-api's actual RabbitMQ contract (`service-order.approved`
+    / `service-order.cancelled` on the `workshop.saga` exchange) — that
+    service is choreography-only and has no REST command endpoint. See
+    `../docs/architecture.md` ("Integration reality vs. original design") for
+    why, plus known gaps (placeholder pricing, no refund endpoint yet).
 - The mocks honor a `correlationId` of `"fail:<STEP>"` (e.g.
   `"fail:START_EXECUTION"`) to deliberately fail a step and demonstrate
   compensation through the real API — see `infra/mocks/simulated-failure.ts`.
