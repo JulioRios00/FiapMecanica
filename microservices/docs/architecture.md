@@ -155,6 +155,57 @@ compensation is logged, not fatal — the remaining ones still run):
 If the very first step (`openServiceOrder`) fails, nothing has happened yet,
 so the saga goes straight to `FAILED` with no compensation to run.
 
+## Monitoring & tracing
+
+Both `os-service` and `saga-orchestrator` log through
+[`nestjs-pino`](https://github.com/iamolegga/nestjs-pino), wired app-wide via
+`app.useLogger(app.get(Logger))` in `main.ts`. That's a deliberate,
+low-infrastructure choice for this scope: no extra service to run, and
+because NestJS's built-in `Logger` routes through whatever `useLogger` sets,
+every existing `new Logger(ClassName.name)` call in the codebase — including
+all the domain-lifecycle logs in `StartServiceOrderSagaUseCase`,
+`SagaCompensationService`, and the OS use-cases — automatically becomes
+structured JSON with no further changes.
+
+**How a request gets correlated across the three hops:**
+
+1. A client (or `saga-orchestrator` itself, if none is given) picks a
+   `correlationId`.
+2. `saga-orchestrator`'s `LoggerModule.forRoot({ pinoHttp: { genReqId } })`
+   reads it from the `x-correlation-id` request header (minting one and
+   echoing it back if absent), so every HTTP access log line for that saga
+   carries the same id.
+3. Every downstream call the orchestrator makes — to `os-service` over HTTP,
+   to `billing-service` over HTTP, and the event published to RabbitMQ for
+   `execution-service-api` — carries `x-correlation-id` (HTTP) or `eventId`
+   (AMQP payload) set to that same value.
+4. `os-service`'s own `genReqId` reads that same header on the way in, so its
+   access logs *and* its business logs (`Service order ... opened
+   (correlationId=...)`) line up with the saga that triggered them.
+
+**What a log line looks like** (all fields are structured, not just
+string-interpolated into `msg` — the interpolation is for human readability
+in `msg`, but `correlationId`/`sagaId`/`osId`/`budgetId` are always present
+in the message text so a `grep`/`jq` filter on any one of them reconstructs
+the whole flow):
+
+```json
+{"level":30,"time":1721900000000,"pid":123,"service":"saga-orchestrator","context":"StartServiceOrderSagaUseCase","msg":"Saga 2ccd... step OPEN_OS complete (osId=os-1, correlationId=48a8...)"}
+```
+
+**Reconstructing a saga's path across both services:**
+
+```bash
+CORR=48a85132-3161-46d2-ae51-9fdfcf739440
+docker compose logs saga-orchestrator os-service | grep "$CORR" | jq -r 'select(.msg) | .msg' 2>/dev/null
+```
+
+This is intentionally the "structured logs, no separate tracing backend"
+tier of observability — enough to answer "what happened to saga X" from logs
+alone. A follow-up would be OpenTelemetry + a trace UI (Jaeger/Tempo) for a
+visual waterfall instead of grepping logs; not done here to keep the
+footprint to what this scope needs.
+
 ## Sequence — happy path
 
 ```mermaid

@@ -41,6 +41,15 @@ diagrams for both the happy path and the compensation path.
   `"fail:START_EXECUTION"`) to deliberately fail a step and demonstrate
   compensation through the real API — see `infra/mocks/simulated-failure.ts`.
 
+## Logging & tracing
+
+Logs are structured JSON via `nestjs-pino`, and every domain-lifecycle log
+(saga started, each step completed, each compensation attempted, saga ended)
+carries `correlationId` — plus `sagaId`/`osId`/`budgetId` where relevant — so
+a saga's full path across `os-service`, billing, and execution can be
+reconstructed by filtering logs on one id. See `../docs/architecture.md`
+("Monitoring & tracing") for the propagation details and an example.
+
 ## Architecture
 
 ```text
