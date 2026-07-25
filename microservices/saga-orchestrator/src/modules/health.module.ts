@@ -7,4 +7,3 @@ import { PrismaService } from '../infra/database/prisma.service';
   providers: [PrismaService],
 })
 export class HealthModule {}
-
