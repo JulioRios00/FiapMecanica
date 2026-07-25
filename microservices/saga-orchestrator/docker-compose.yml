@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  saga-orchestrator-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: saga_orchestrator
+      POSTGRES_USER: saga_user
+      POSTGRES_PASSWORD: saga_pass
+    ports:
+      - '5436:5432'
+
+  saga-orchestrator:
+    build: .
+    restart: on-failure
+    environment:
+      PORT: 3020
+      DATABASE_URL: postgresql://saga_user:saga_pass@saga-orchestrator-db:5432/saga_orchestrator?schema=public
+      # os-service is a sibling service; reach it via the host when each
+      # microservice is run from its own docker-compose file.
+      OS_SERVICE_URL: http://host.docker.internal:3010/api/v1
+      # Billing/Execution services are owned by other teams and aren't part
+      # of this repo yet, so downstream calls default to in-process mocks.
+      USE_MOCK_DOWNSTREAM: 'true'
+    depends_on:
+      - saga-orchestrator-db
+    ports:
+      - '3020:3020'
