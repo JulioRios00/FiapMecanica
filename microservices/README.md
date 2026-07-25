@@ -2,7 +2,9 @@
 
 This folder contains local, independent repository-ready scaffolds for:
 
-1. `os-service` (implemented)
+1. `os-service` — extracted into its own repository: [github.com/JulioRios00/fiap-os-service](https://github.com/JulioRios00/fiap-os-service).
+   Kept as a local checkout here (nested `.git`, gitignored by this folder) so it can still be run alongside
+   `saga-orchestrator`; not tracked by this repo.
 2. `billing-service` (scaffold only)
 3. `execution-service` (scaffold only)
 4. `saga-orchestrator` (implemented)

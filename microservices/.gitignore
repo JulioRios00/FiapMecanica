@@ -25,3 +25,6 @@ prisma/migrations/*/migration.sql
 
 # Sonar
 .scannerwork/
+
+# Extracted into its own repository (github.com/JulioRios00/fiap-os-service)
+os-service/
