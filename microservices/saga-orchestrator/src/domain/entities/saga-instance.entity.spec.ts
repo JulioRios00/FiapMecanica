@@ -19,15 +19,17 @@ describe('SagaInstance', () => {
     expect(saga.getStatus()).toBe('STARTED');
   });
 
-  it('tracks the osId and completed steps as the saga advances', () => {
+  it('tracks the osId, budgetId, and completed steps as the saga advances', () => {
     const saga = buildSaga();
 
     saga.setOsId('os-1');
     saga.markStepCompleted('OPEN_OS');
+    saga.setBudgetId('budget-1');
     saga.markStepCompleted('REQUEST_QUOTE');
     saga.setAwaitingApproval();
 
     expect(saga.getOsId()).toBe('os-1');
+    expect(saga.getBudgetId()).toBe('budget-1');
     expect(saga.getCompletedSteps()).toEqual(['OPEN_OS', 'REQUEST_QUOTE']);
     expect(saga.getStatus()).toBe('AWAITING_QUOTE_APPROVAL');
   });

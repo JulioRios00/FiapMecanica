@@ -25,7 +25,7 @@ describe('StartServiceOrderSagaUseCase', () => {
       cancelServiceOrder: jest.fn().mockResolvedValue(undefined),
     };
     billingService = {
-      requestQuote: jest.fn().mockResolvedValue(undefined),
+      requestQuote: jest.fn().mockResolvedValue({ budgetId: 'budget-1' }),
       confirmPayment: jest.fn().mockResolvedValue(undefined),
       cancelQuote: jest.fn().mockResolvedValue(undefined),
       notifyExecutionFailure: jest.fn().mockResolvedValue(undefined),
@@ -54,8 +54,12 @@ describe('StartServiceOrderSagaUseCase', () => {
       description: 'Replace brake pads',
       correlationId: 'corr-1',
     });
-    expect(billingService.requestQuote).toHaveBeenCalledWith({ osId: 'os-1', correlationId: 'corr-1' });
-    expect(billingService.confirmPayment).toHaveBeenCalledWith({ osId: 'os-1', correlationId: 'corr-1' });
+    expect(billingService.requestQuote).toHaveBeenCalledWith({
+      osId: 'os-1',
+      description: 'Replace brake pads',
+      correlationId: 'corr-1',
+    });
+    expect(billingService.confirmPayment).toHaveBeenCalledWith({ budgetId: 'budget-1', correlationId: 'corr-1' });
     expect(executionService.startExecution).toHaveBeenCalledWith({ osId: 'os-1', correlationId: 'corr-1' });
     expect(osService.updateStatus).toHaveBeenCalledWith({
       id: 'os-1',

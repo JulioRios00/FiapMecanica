@@ -13,6 +13,7 @@ export class PrismaSagaRepository implements SagaRepositoryPort {
       data: {
         id: data.id,
         osId: data.osId,
+        budgetId: data.budgetId,
         status: data.status,
         correlationId: data.correlationId,
         completedSteps: data.completedSteps,
@@ -29,6 +30,7 @@ export class PrismaSagaRepository implements SagaRepositoryPort {
       where: { id: data.id },
       data: {
         osId: data.osId,
+        budgetId: data.budgetId,
         status: data.status,
         completedSteps: data.completedSteps,
         lastError: data.lastError,
@@ -46,6 +48,7 @@ export class PrismaSagaRepository implements SagaRepositoryPort {
   private map(data: {
     id: string;
     osId: string | null;
+    budgetId: string | null;
     status: string;
     correlationId: string;
     completedSteps: string[];
@@ -56,6 +59,7 @@ export class PrismaSagaRepository implements SagaRepositoryPort {
     return new SagaInstance({
       id: data.id,
       osId: data.osId ?? undefined,
+      budgetId: data.budgetId ?? undefined,
       status: data.status as SagaStatus,
       correlationId: data.correlationId,
       completedSteps: data.completedSteps as SagaStep[],

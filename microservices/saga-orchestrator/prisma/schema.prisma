@@ -21,6 +21,7 @@ enum SagaStatus {
 model SagaInstance {
   id             String     @id @default(uuid())
   osId           String?
+  budgetId       String?
   status         SagaStatus @default(STARTED)
   correlationId  String
   completedSteps String[]   @default([])

@@ -54,12 +54,17 @@ export class StartServiceOrderSagaUseCase {
       saga.markStepCompleted('OPEN_OS');
       saga = await this.sagaRepository.save(saga);
 
-      await this.billingService.requestQuote({ osId, correlationId });
+      const { budgetId } = await this.billingService.requestQuote({
+        osId,
+        description: input.description,
+        correlationId,
+      });
+      saga.setBudgetId(budgetId);
       saga.markStepCompleted('REQUEST_QUOTE');
       saga.setAwaitingApproval();
       saga = await this.sagaRepository.save(saga);
 
-      await this.billingService.confirmPayment({ osId, correlationId });
+      await this.billingService.confirmPayment({ budgetId, correlationId });
       saga.markStepCompleted('CONFIRM_PAYMENT');
       saga.setPaymentConfirmed();
       saga = await this.sagaRepository.save(saga);

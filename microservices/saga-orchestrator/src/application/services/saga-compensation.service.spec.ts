@@ -71,12 +71,13 @@ describe('SagaCompensationService', () => {
     const saga = buildSaga();
     saga.setOsId('os-1');
     saga.markStepCompleted('OPEN_OS');
+    saga.setBudgetId('budget-1');
     saga.markStepCompleted('REQUEST_QUOTE');
 
     await service.compensate(saga, 'payment declined', 'corr-1');
 
     expect(billingService.cancelQuote).toHaveBeenCalledWith({
-      osId: 'os-1',
+      budgetId: 'budget-1',
       reason: 'payment declined',
       correlationId: 'corr-1',
     });
@@ -92,13 +93,14 @@ describe('SagaCompensationService', () => {
     const saga = buildSaga();
     saga.setOsId('os-1');
     saga.markStepCompleted('OPEN_OS');
+    saga.setBudgetId('budget-1');
     saga.markStepCompleted('REQUEST_QUOTE');
     saga.markStepCompleted('CONFIRM_PAYMENT');
 
     await service.compensate(saga, 'execution rejected', 'corr-1');
 
     expect(billingService.notifyExecutionFailure).toHaveBeenCalledWith({
-      osId: 'os-1',
+      budgetId: 'budget-1',
       reason: 'execution rejected',
       correlationId: 'corr-1',
     });
@@ -110,6 +112,7 @@ describe('SagaCompensationService', () => {
     const saga = buildSaga();
     saga.setOsId('os-1');
     saga.markStepCompleted('OPEN_OS');
+    saga.setBudgetId('budget-1');
     saga.markStepCompleted('REQUEST_QUOTE');
     saga.markStepCompleted('CONFIRM_PAYMENT');
     saga.markStepCompleted('START_EXECUTION');
@@ -129,6 +132,7 @@ describe('SagaCompensationService', () => {
     const saga = buildSaga();
     saga.setOsId('os-1');
     saga.markStepCompleted('OPEN_OS');
+    saga.setBudgetId('budget-1');
     saga.markStepCompleted('REQUEST_QUOTE');
     billingService.cancelQuote.mockRejectedValue(new Error('billing down'));
 

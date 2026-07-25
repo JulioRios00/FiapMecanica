@@ -13,6 +13,7 @@ export type SagaStatus =
 export interface SagaInstanceProps {
   id: string;
   osId?: string;
+  budgetId?: string;
   status: SagaStatus;
   correlationId: string;
   completedSteps?: SagaStep[];
@@ -30,6 +31,11 @@ export class SagaInstance {
 
   setOsId(osId: string): void {
     this.props.osId = osId;
+    this.props.updatedAt = new Date();
+  }
+
+  setBudgetId(budgetId: string): void {
+    this.props.budgetId = budgetId;
     this.props.updatedAt = new Date();
   }
 
@@ -86,6 +92,10 @@ export class SagaInstance {
 
   getOsId(): string | undefined {
     return this.props.osId;
+  }
+
+  getBudgetId(): string | undefined {
+    return this.props.budgetId;
   }
 
   getStatus(): SagaStatus {

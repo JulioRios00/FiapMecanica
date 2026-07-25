@@ -27,6 +27,7 @@ export class SagaCompensationService {
       return;
     }
 
+    const budgetId = saga.getBudgetId();
     const steps = new Set(saga.getCompletedSteps());
 
     if (steps.has('START_EXECUTION')) {
@@ -35,12 +36,14 @@ export class SagaCompensationService {
       );
     }
 
-    if (steps.has('CONFIRM_PAYMENT')) {
+    if (budgetId && steps.has('CONFIRM_PAYMENT')) {
       await this.run(saga, 'notifyExecutionFailure', () =>
-        this.billingService.notifyExecutionFailure({ osId, reason, correlationId }),
+        this.billingService.notifyExecutionFailure({ budgetId, reason, correlationId }),
       );
-    } else if (steps.has('REQUEST_QUOTE')) {
-      await this.run(saga, 'cancelQuote', () => this.billingService.cancelQuote({ osId, reason, correlationId }));
+    } else if (budgetId && steps.has('REQUEST_QUOTE')) {
+      await this.run(saga, 'cancelQuote', () =>
+        this.billingService.cancelQuote({ budgetId, reason, correlationId }),
+      );
     }
 
     await this.run(saga, 'cancelServiceOrder', () =>
